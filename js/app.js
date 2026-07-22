@@ -1928,8 +1928,8 @@ class ECommerceApp {
               <label class="payment-method-option" id="method-online">
                 <input type="radio" name="pay-method" value="ONLINE">
                 <div class="payment-method-details">
-                  <h4>UPI / Online Payments Placeholder</h4>
-                  <p>Razorpay / UPI integrated system gateway placeholder (Available in Phase 2).</p>
+                  <h4>Pay Online (UPI / Card / Net Banking)</h4>
+                  <p>Pay securely via Razorpay — UPI, debit/credit cards, wallets, and net banking.</p>
                 </div>
               </label>
             </div>
@@ -2022,7 +2022,7 @@ class ECommerceApp {
     const chForm = document.getElementById("checkout-form");
     if (chForm) {
       window.setupPhoneField(document.getElementById("ch-phone"));
-      chForm.addEventListener("submit", (e) => {
+      chForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         
         const phoneVal = document.getElementById("ch-phone").value.trim();
@@ -2066,65 +2066,121 @@ class ECommerceApp {
         };
 
         if (payMethod === "ONLINE") {
-          const razorpayKey = this.store.razorpayKey || "";
-          if (!razorpayKey) {
-            window.GalaxyUtils.showToast("Online payments are not configured yet in Admin Settings. Please use Cash on Delivery.", "error");
-            return;
+          // ============================================
+          // SECURE RAZORPAY PAYMENT FLOW
+          // Step 1: Ask backend to create a Razorpay Order
+          // Step 2: Open Razorpay Checkout with the order_id
+          // Step 3: On success, send payment data to backend for verification
+          // Step 4: Only finalize order after server confirms payment is genuine
+          // ============================================
+
+          const submitBtn = chForm.querySelector('button[type="submit"]');
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Processing...";
+
+          try {
+            // Step 1: Create order on the server
+            const createOrderResponse = await fetch('http://localhost:5000/api/payment/create-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                amount: orderDetails.total,           // Amount in rupees
+                receipt: orderDetails.orderId,        // Our internal order ID as receipt
+                notes: {
+                  customer_name: orderDetails.name,
+                  customer_phone: orderDetails.phone
+                }
+              })
+            });
+
+            if (!createOrderResponse.ok) {
+              const errorData = await createOrderResponse.json();
+              throw new Error(errorData.error || 'Failed to create payment order.');
+            }
+
+            const razorpayOrder = await createOrderResponse.json();
+
+            // Step 2: Open Razorpay Checkout with the server-created order
+            const rzpOptions = {
+              "key": razorpayOrder.key_id,
+              "amount": razorpayOrder.amount,           // Already in paise from server
+              "currency": razorpayOrder.currency,
+              "name": "Galaxy Decor",
+              "description": "Furniture Showroom Purchase",
+              "image": "/assets/logo.png",
+              "order_id": razorpayOrder.order_id,       // This links payment to our server order
+              "handler": async (response) => {
+                // Step 3: Payment completed on Razorpay — now verify on our server
+                try {
+                  const verifyResponse = await fetch('http://localhost:5000/api/payment/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      razorpay_order_id: response.razorpay_order_id,
+                      razorpay_payment_id: response.razorpay_payment_id,
+                      razorpay_signature: response.razorpay_signature,
+                      orderDetails: orderDetails
+                    })
+                  });
+
+                  const verifyResult = await verifyResponse.json();
+
+                  if (verifyResponse.ok && verifyResult.verified) {
+                    // Step 4: Payment verified — finalize the order
+                    orderDetails.paymentStatus = "Paid";
+                    orderDetails.paymentDetails = {
+                      razorpay_payment_id: response.razorpay_payment_id,
+                      razorpay_order_id: response.razorpay_order_id
+                    };
+                    this.finalizeOrder(orderDetails);
+                  } else {
+                    window.GalaxyUtils.showToast(
+                      "Payment verification failed. Please contact us if money was deducted.",
+                      "error"
+                    );
+                  }
+                } catch (verifyError) {
+                  console.error("Payment verification error:", verifyError);
+                  window.GalaxyUtils.showToast(
+                    "Could not verify payment. Please contact us with your payment ID.",
+                    "error"
+                  );
+                }
+
+                submitBtn.disabled = false;
+                submitBtn.textContent = `Confirm Order (₹${orderDetails.total.toLocaleString()})`;
+              },
+              "modal": {
+                "ondismiss": () => {
+                  // User closed the Razorpay popup without paying
+                  submitBtn.disabled = false;
+                  submitBtn.textContent = `Confirm Order (₹${orderDetails.total.toLocaleString()})`;
+                  window.GalaxyUtils.showToast("Payment was cancelled.", "info");
+                }
+              },
+              "theme": {
+                "color": "#C9A227"
+              },
+              "prefill": {
+                "name": orderDetails.name,
+                "email": orderDetails.email,
+                "contact": orderDetails.phone
+              }
+            };
+
+            const rzp = new Razorpay(rzpOptions);
+            rzp.open();
+
+          } catch (error) {
+            console.error("Razorpay order creation error:", error);
+            window.GalaxyUtils.showToast(
+              error.message || "Failed to start online payment. Please try Cash on Delivery.",
+              "error"
+            );
+            submitBtn.disabled = false;
+            submitBtn.textContent = `Confirm Order (₹${orderDetails.total.toLocaleString()})`;
           }
 
-          const rzpOptions = {
-            "key": razorpayKey,
-            "amount": Math.round((subtotal - discountAmt + totalShipping) * 100), // Amount in paise
-            "currency": "INR",
-            "name": "Galaxy Decor",
-            "description": "Furniture Showroom Purchase",
-            "image": "/assets/logo.png",
-            "handler": (response) => {
-              orderDetails.paymentStatus = "Paid";
-              orderDetails.paymentDetails = {
-                razorpay_payment_id: response.razorpay_payment_id
-              };
-              this.finalizeOrder(orderDetails);
-            },
-            "theme": {
-              "color": "#C9A227"
-            },
-            "prefill": {
-              "name": orderDetails.name,
-              "email": orderDetails.email,
-              "contact": orderDetails.phone,
-              "method": "upi" // Force Razorpay to open UPI directly
-            },
-            "config": {
-              "display": {
-                "blocks": {
-                  "upi": {
-                    "name": "Pay via UPI / QR",
-                    "instruments": [
-                      { "method": "upi" },
-                      { "method": "upi", "flows": ["qr"] },
-                      { "method": "upi", "flows": ["intent"] }
-                    ]
-                  },
-                  "other": {
-                    "name": "Other Payment Modes",
-                    "instruments": [
-                      { "method": "card" },
-                      { "method": "netbanking" },
-                      { "method": "wallet" }
-                    ]
-                  }
-                },
-                "sequence": ["block.upi", "block.other"],
-                "preferences": {
-                  "show_default_blocks": false
-                }
-              }
-            }
-          };
-
-          const rzp = new Razorpay(rzpOptions);
-          rzp.open();
         } else {
           orderDetails.paymentStatus = "Pending";
           this.finalizeOrder(orderDetails);
