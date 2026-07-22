@@ -2093,6 +2093,30 @@ class ECommerceApp {
             },
             "theme": {
               "color": "#C9A227"
+            },
+            "config": {
+              "display": {
+                "blocks": {
+                  "upi": {
+                    "name": "Pay via UPI / QR",
+                    "instruments": [
+                      { "method": "upi" }
+                    ]
+                  },
+                  "other": {
+                    "name": "Other Payment Modes",
+                    "instruments": [
+                      { "method": "card" },
+                      { "method": "netbanking" },
+                      { "method": "wallet" }
+                    ]
+                  }
+                },
+                "sequence": ["block.upi", "block.other"],
+                "preferences": {
+                  "show_default_blocks": false
+                }
+              }
             }
           };
 
