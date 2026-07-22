@@ -2086,13 +2086,14 @@ class ECommerceApp {
               };
               this.finalizeOrder(orderDetails);
             },
+            "theme": {
+              "color": "#C9A227"
+            },
             "prefill": {
               "name": orderDetails.name,
               "email": orderDetails.email,
-              "contact": orderDetails.phone
-            },
-            "theme": {
-              "color": "#C9A227"
+              "contact": orderDetails.phone,
+              "method": "upi" // Force Razorpay to open UPI directly
             },
             "config": {
               "display": {
@@ -2100,7 +2101,9 @@ class ECommerceApp {
                   "upi": {
                     "name": "Pay via UPI / QR",
                     "instruments": [
-                      { "method": "upi" }
+                      { "method": "upi" },
+                      { "method": "upi", "flows": ["qr"] },
+                      { "method": "upi", "flows": ["intent"] }
                     ]
                   },
                   "other": {
