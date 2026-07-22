@@ -1365,6 +1365,7 @@
                     <th>Interest Sourced</th>
                     <th>Message Submission</th>
                     <th>Received Date</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody id="enquiries-table-tbody">
@@ -2781,23 +2782,36 @@
       }
     });
 
+    window.deleteEnquiry = function(index) {
+      if (confirm("Are you sure you want to delete this enquiry?")) {
+        enquiries.splice(index, 1);
+        saveEnquiries();
+        renderEnquiriesTab();
+        window.GalaxyUtils.showToast("Enquiry deleted successfully.", "success");
+      }
+    };
+
     function renderEnquiriesTab() {
       const tbody = document.getElementById("enquiries-table-tbody");
 
       if (enquiries.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem; color:#999;">No enquiry submission logs.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:#999;">No enquiry submission logs.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = enquiries.map(e => `
+      tbody.innerHTML = [...enquiries].reverse().map((e, idx) => {
+        const originalIndex = enquiries.length - 1 - idx;
+        return `
         <tr>
           <td><strong>${e.name}</strong><br><span style="font-size:0.75rem; color:#777;"><i data-lucide="phone" style="width:10px;height:10px;vertical-align:middle;margin-right:2px;"></i>${e.phone}</span></td>
           <td><a href="mailto:${e.email}" style="text-decoration:underline;">${e.email}</a></td>
           <td><span style="background-color:#eee; padding:0.15rem 0.4rem; border-radius:4px; font-size:0.75rem;">${getCategoryName(e.interest)}</span></td>
           <td style="max-width:320px; font-style:italic;">"${e.message}"</td>
           <td style="color:#777;">${e.date}</td>
+          <td><button class="btn btn-danger btn-sm" onclick="deleteEnquiry(${originalIndex})" title="Delete"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button></td>
         </tr>
-      `).join("").split("\n").reverse().join("\n"); // Show newest first
+        `;
+      }).join("");
 
       lucide.createIcons();
     }
