@@ -1,0 +1,3013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GALAXY DECOR - Secure Admin Portal</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* --- CSS Variables & Design Tokens --- */
+    :root {
+      --color-primary: #ffffff;
+      --color-primary-soft: #fcfcfc;
+      --color-primary-dark: #f0f0f0;
+      
+      --color-secondary: #000000;
+      --color-secondary-soft: #111111;
+      --color-secondary-light: #222222;
+      --color-secondary-muted: #666666;
+      
+      --color-accent: #C9A227;
+      --color-accent-hover: #b58e1a;
+      --color-accent-soft: rgba(201, 162, 39, 0.08);
+      --color-accent-border: rgba(201, 162, 39, 0.3);
+      
+      --color-success: #2e7d32;
+      --color-error: #c62828;
+      --color-border: #e0e0e0;
+      
+      --font-serif: 'Cormorant Garamond', serif;
+      --font-sans: 'Inter', sans-serif;
+      
+      --border-radius: 4px;
+      --transition-fast: 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      --transition-smooth: 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: #fafafa;
+      color: var(--color-secondary-light);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* --- Form Control Elements --- */
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.4rem;
+      color: var(--color-secondary-muted);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: 1px solid var(--color-border);
+      background-color: var(--color-primary);
+      color: var(--color-secondary-soft);
+      font-size: 0.9rem;
+      border-radius: var(--border-radius);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px var(--color-accent-soft);
+    }
+
+    /* --- Buttons --- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-radius: var(--border-radius);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-gold {
+      background-color: var(--color-accent);
+      color: var(--color-primary);
+    }
+
+    .btn-gold:hover {
+      background-color: var(--color-accent-hover);
+    }
+
+    .btn-black {
+      background-color: var(--color-secondary);
+      color: var(--color-primary);
+    }
+
+    .btn-black:hover {
+      background-color: var(--color-secondary-soft);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border-color: var(--color-secondary);
+      color: var(--color-secondary);
+    }
+
+    .btn-outline:hover {
+      background-color: var(--color-secondary);
+      color: var(--color-primary);
+    }
+
+    .btn-danger {
+      background-color: var(--color-error);
+      color: var(--color-primary);
+    }
+
+    .btn-danger:hover {
+      opacity: 0.9;
+    }
+
+    .btn-sm {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.75rem;
+    }
+
+    /* --- Access / Login Screen --- */
+    .login-container {
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #111 0%, #000 100%);
+      padding: 1.5rem;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(26, 26, 26, 0.85);
+      border: 1px solid var(--color-accent-border);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
+      color: var(--color-primary);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .login-header h1 {
+      font-family: var(--font-serif);
+      font-size: 2.2rem;
+      letter-spacing: 2px;
+      color: var(--color-accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .login-header p {
+      font-size: 0.8rem;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .login-card .form-group label {
+      color: #ccc;
+    }
+
+    .login-card .form-control {
+      background-color: #222;
+      border-color: #444;
+      color: #fff;
+    }
+
+    .login-card .form-control:focus {
+      border-color: var(--color-accent);
+    }
+
+    .login-error {
+      background-color: rgba(198, 40, 40, 0.2);
+      border: 1px solid var(--color-error);
+      color: #ff8a80;
+      padding: 0.8rem;
+      border-radius: var(--border-radius);
+      font-size: 0.8rem;
+      margin-bottom: 1.2rem;
+      display: none;
+    }
+
+    /* --- Credentials Hint Box --- */
+    .cred-hint-box {
+      margin-top: 1.5rem;
+      background: rgba(201, 162, 39, 0.06);
+      border: 1px dashed rgba(201, 162, 39, 0.35);
+      border-radius: 10px;
+      padding: 0.9rem 1rem;
+    }
+
+    .cred-hint-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-accent);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 0.75rem;
+    }
+
+    .cred-hint-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.45rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .cred-hint-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .cred-label {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.4);
+      width: 68px;
+      flex-shrink: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .cred-value {
+      font-size: 0.82rem;
+      font-family: 'Courier New', monospace;
+      color: #ffffff;
+      background: rgba(255,255,255,0.07);
+      border-radius: 5px;
+      padding: 2px 8px;
+      flex: 1;
+      letter-spacing: 0.04em;
+    }
+
+    .cred-copy-btn {
+      background: rgba(201, 162, 39, 0.15);
+      border: 1px solid rgba(201, 162, 39, 0.3);
+      color: var(--color-accent);
+      border-radius: 6px;
+      padding: 3px 9px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      letter-spacing: 0.04em;
+    }
+
+    .cred-copy-btn:hover {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: #000;
+    }
+
+    .cred-copy-btn.copied {
+      background: rgba(46, 125, 50, 0.25);
+      border-color: rgba(46, 125, 50, 0.5);
+      color: #69f0ae;
+    }
+
+    /* --- Admin Layout --- */
+    .admin-header {
+      background-color: var(--color-secondary-soft);
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: 0 2rem;
+      border-bottom: 1px solid var(--color-accent-border);
+      color: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    /* --- Admin Global Search Bar --- */
+    .admin-global-search {
+      flex: 1;
+      max-width: 420px;
+      position: relative;
+    }
+
+    .admin-global-search svg.search-icon-hdr {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255,255,255,0.4);
+      pointer-events: none;
+    }
+
+    .admin-global-search input {
+      width: 100%;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.83rem;
+      padding: 0.5rem 1rem 0.5rem 2.4rem;
+      outline: none;
+      transition: border-color 0.2s ease, background 0.2s ease;
+      font-family: var(--font-sans);
+    }
+
+    .admin-global-search input::placeholder { color: rgba(255,255,255,0.3); }
+
+    .admin-global-search input:focus {
+      border-color: var(--color-accent);
+      background: rgba(201,162,39,0.06);
+    }
+
+    /* --- Image Upload Widget --- */
+    .img-upload-widget {
+      border: 2px dashed rgba(201,162,39,0.35);
+      border-radius: 12px;
+      padding: 1.2rem;
+      background: rgba(201,162,39,0.03);
+      transition: border-color 0.2s ease;
+    }
+
+    .img-upload-widget:hover,
+    .img-upload-widget.dragover {
+      border-color: var(--color-accent);
+      background: rgba(201,162,39,0.06);
+    }
+
+    .img-upload-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 0.75rem;
+    }
+
+    .img-upload-thumb-wrap {
+      position: relative;
+      width: calc(33.333% - 6px);
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .img-upload-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .img-upload-thumb-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .img-upload-thumb-remove:hover { background: var(--color-error); }
+
+    .img-upload-preview {
+      width: 100%;
+      height: 160px;
+      object-fit: contain;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      background: rgba(255,255,255,0.04);
+      display: none;
+    }
+
+    .img-upload-preview.has-img { display: block; }
+
+    .img-upload-placeholder {
+      text-align: center;
+      padding: 1rem 0 0.5rem;
+      color: rgba(255,255,255,0.35);
+      font-size: 0.8rem;
+    }
+
+    .img-upload-placeholder svg { margin-bottom: 0.5rem; opacity: 0.5; }
+
+    .img-upload-placeholder.hidden { display: none; }
+
+    .img-upload-actions {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 0.6rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .img-upload-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--color-accent);
+      color: #000;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 7px;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: background 0.2s ease;
+    }
+
+    .img-upload-label:hover { background: #e8c24e; }
+
+    .img-upload-filename {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.45);
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .img-clear-btn {
+      background: rgba(198,40,40,0.18);
+      border: 1px solid rgba(198,40,40,0.35);
+      color: #ff6b6b;
+      border-radius: 7px;
+      padding: 5px 10px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: none;
+    }
+
+    .img-clear-btn:hover { background: rgba(198,40,40,0.35); }
+    .img-clear-btn.visible { display: inline-flex; align-items: center; gap: 4px; }
+
+    .admin-logo h2 {
+      font-family: var(--font-serif);
+      letter-spacing: 2px;
+      font-size: 1.5rem;
+    }
+
+    .admin-logo span {
+      color: var(--color-accent);
+    }
+
+    .admin-profile {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .admin-user-info {
+      text-align: right;
+      font-size: 0.8rem;
+    }
+
+    .admin-user-info p {
+      font-weight: 600;
+    }
+
+    .admin-user-info span {
+      color: var(--color-accent);
+      font-size: 0.75rem;
+    }
+
+    .admin-body {
+      display: flex;
+      min-height: calc(100vh - 70px);
+    }
+
+    /* Sidebar Navigation */
+    .admin-sidebar {
+      width: 260px;
+      background-color: var(--color-secondary-soft);
+      color: #ccc;
+      border-right: 1px solid #222;
+      padding: 1.5rem 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .admin-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.85rem 1.5rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all var(--transition-fast);
+      border-left: 3px solid transparent;
+      cursor: pointer;
+    }
+
+    .menu-item:hover, .menu-item.active {
+      color: #fff;
+      background-color: var(--color-secondary-light);
+    }
+
+    .menu-item.active {
+      border-left-color: var(--color-accent);
+      background-color: #161616;
+    }
+
+    .menu-item i {
+      width: 16px;
+      height: 16px;
+    }
+
+    .sidebar-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #222;
+    }
+
+    /* Content Area */
+    .admin-content {
+      flex-grow: 1;
+      padding: 2rem;
+      background-color: #f7f8f9;
+      overflow-y: auto;
+    }
+
+    .content-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 1rem;
+    }
+
+    .content-header h1 {
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .content-header p {
+      font-size: 0.85rem;
+      color: var(--color-secondary-muted);
+    }
+
+    /* --- Dashboard Overview Tab --- */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+      background-color: var(--color-primary);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-info h3 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--color-secondary-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-info p {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--color-secondary-soft);
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: var(--color-accent-soft);
+      color: var(--color-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dashboard-tables-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .panel {
+      background-color: var(--color-primary);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1.5rem;
+    }
+
+    .panel-title {
+      font-family: var(--font-serif);
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 0.6rem;
+    }
+
+    /* --- Tables Styling --- */
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+
+    .admin-table th {
+      padding: 0.8rem 1rem;
+      background-color: #f1f2f4;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      color: var(--color-secondary-muted);
+      border-bottom: 2px solid var(--color-border);
+    }
+
+    .admin-table td {
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid var(--color-border);
+      vertical-align: middle;
+    }
+
+    .admin-table tbody tr:hover {
+      background-color: #fcfcfc;
+    }
+
+    /* --- Badges & Tags --- */
+    .status-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      border-radius: 10px;
+      text-transform: uppercase;
+    }
+
+    .status-new { background-color: #e3f2fd; color: #1565c0; }
+    .status-processing { background-color: #fff3e0; color: #e65100; }
+    .status-shipped { background-color: #ede7f6; color: #5e35b1; }
+    .status-delivered { background-color: #e8f5e9; color: #2e7d32; }
+    .status-cancelled { background-color: #ffebee; color: #c62828; }
+
+    .payment-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .payment-paid { color: var(--color-success); }
+    .payment-pending { color: #f57c00; }
+
+    /* --- Image Preview Cells --- */
+    .thumb-cell {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--border-radius);
+      object-fit: cover;
+      background-color: #f0f0f0;
+      border: 1px solid var(--color-border);
+    }
+
+    /* --- Modals --- */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1.5rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-fast);
+    }
+
+    .modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background-color: var(--color-primary);
+      border-radius: var(--border-radius);
+      width: 100%;
+      max-width: 680px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      padding: 2rem;
+      transform: translateY(-20px);
+      transition: transform var(--transition-smooth);
+    }
+
+    .modal.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-header h2 {
+      font-family: var(--font-serif);
+      font-size: 1.6rem;
+      letter-spacing: 1px;
+    }
+
+    .close-modal-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-secondary-muted);
+    }
+
+    .close-modal-btn:hover {
+      color: var(--color-secondary);
+    }
+
+    /* --- Filter Controls Row --- */
+    .controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .search-filter-box {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-grow: 1;
+      max-width: 500px;
+    }
+
+    /* Tab Section toggles */
+    .tab-section {
+      display: none;
+    }
+
+    .tab-section.active {
+      display: block;
+    }
+
+    /* Specifications grid in forms */
+    .specs-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+      background-color: #fcfcfc;
+      padding: 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius);
+    }
+
+    .specs-form-grid h4 {
+      grid-column: span 2;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--color-accent);
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 4px;
+      margin-bottom: 4px;
+    }
+
+    /* Detail card for order popup */
+    .order-summary-box {
+      background-color: #fafafa;
+      padding: 1.2rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius);
+      margin-bottom: 1.2rem;
+    }
+
+    .order-details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .order-details-label {
+      font-weight: 600;
+      color: var(--color-secondary-muted);
+    }
+
+    .order-history-timeline {
+      margin-top: 1.5rem;
+      border-left: 2px solid var(--color-accent);
+      padding-left: 1rem;
+      margin-left: 5px;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 1rem;
+      font-size: 0.8rem;
+    }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: -17px;
+      top: 4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--color-accent);
+      border: 2px solid #fff;
+    }
+
+    .timeline-date {
+      color: var(--color-secondary-muted);
+      font-size: 0.75rem;
+    }
+
+    .timeline-status {
+      font-weight: 600;
+      margin-right: 5px;
+    }
+
+    /* Settings section */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 992px) {
+      .dashboard-tables-grid, .settings-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .admin-body {
+        flex-direction: column;
+      }
+      .admin-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #222;
+        padding: 0.5rem 0;
+      }
+      .admin-menu {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 5px;
+        white-space: nowrap;
+      }
+      .menu-item {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+        flex: 0 0 auto;
+      }
+      .admin-main-content {
+        padding: 1rem;
+        width: 100%;
+        overflow-x: hidden;
+      }
+      .admin-header {
+        padding: 0 1rem;
+        gap: 0.5rem;
+      }
+      .admin-global-search, .admin-user-info {
+        display: none !important;
+      }
+      .admin-logo h2 {
+        font-size: 1.2rem;
+      }
+      .admin-card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        overflow-x: auto; /* Fixes overflowing tables */
+      }
+      .modal-content {
+        width: 95%;
+        max-width: 100% !important;
+        padding: 1.5rem;
+      }
+      .controls-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .controls-row > * {
+        width: 100%;
+        margin-bottom: 0.5rem;
+      }
+      .form-actions {
+        flex-direction: column;
+      }
+      .form-actions button {
+        width: 100%;
+        margin-left: 0 !important;
+        margin-top: 0.5rem;
+      }
+    }
+
+    /* Back to Website link on login */
+    .back-home-link {
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 0.78rem;
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      margin-top: 1.5rem;
+      gap: 6px;
+      transition: color 0.2s ease, transform 0.2s ease;
+      font-family: var(--font-sans);
+    }
+    
+    .back-home-link:hover {
+      color: var(--color-accent);
+      transform: translateX(-4px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       LOGIN PAGE / ACCESS GATEWAY
+       ========================================================================== -->
+  <div id="login-screen" class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <h1>GALAXY DECOR</h1>
+        <p>Administrative Access Gateway</p>
+      </div>
+      <div id="login-error-alert" class="login-error">
+        Invalid Admin Username or Password.
+      </div>
+      <form id="admin-login-form">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" class="form-control" placeholder="admin" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-gold btn-block" style="width:100%; margin-top:1.5rem;">Access Dashboard</button>
+      </form>
+
+      <!-- Credentials Hint Box -->
+      <div class="cred-hint-box">
+        <div class="cred-hint-title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Demo Credentials
+        </div>
+        <div class="cred-hint-row">
+          <span class="cred-label">Username</span>
+          <span class="cred-value" id="cred-user">admin</span>
+          <button class="cred-copy-btn" onclick="copyCredential('cred-user', this)" title="Copy username">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <div class="cred-hint-row">
+          <span class="cred-label">Password</span>
+          <span class="cred-value" id="cred-pass">galaxy123</span>
+          <button class="cred-copy-btn" onclick="copyCredential('cred-pass', this)" title="Copy password">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+      </div>
+
+      <!-- Back to website homepage -->
+      <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 0.5rem;">
+        <a href="index.html" class="back-home-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Back to Homepage
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       ADMIN PORTAL APPLICATION DASHBOARD
+       ========================================================================== -->
+  <div id="admin-dashboard-app" style="display:none;">
+    
+    <!-- Top Header -->
+    <header class="admin-header">
+      <div class="admin-logo">
+        <h2>GALAXY<span>DECOR</span></h2>
+      </div>
+
+      <!-- Global Search Bar -->
+      <div class="admin-global-search">
+        <svg class="search-icon-hdr" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="admin-global-search-input" placeholder="Search products, orders, enquiries…" autocomplete="off">
+      </div>
+
+      <div class="admin-profile">
+        <div class="admin-user-info">
+          <p>Super Administrator</p>
+          <span>Showroom Sourcing active</span>
+        </div>
+        <button id="btn-logout" class="btn btn-outline btn-sm" style="border-color:#444; color:#fff;"><i data-lucide="log-out" style="width:12px;height:12px;margin-right:5px;vertical-align:middle;"></i>Logout</button>
+      </div>
+    </header>
+
+    <!-- Sidebar and Content Body -->
+    <div class="admin-body">
+      
+      <!-- Left Navigation Menu -->
+      <aside class="admin-sidebar">
+        <nav class="admin-menu">
+          <div class="menu-item active" data-tab="overview">
+            <i data-lucide="bar-chart-2"></i> Overview Dashboard
+          </div>
+          <div class="menu-item" data-tab="products">
+            <i data-lucide="package"></i> Manage Inventory
+          </div>
+          <div class="menu-item" data-tab="categories">
+            <i data-lucide="grid"></i> Manage Categories
+          </div>
+          <div class="menu-item" data-tab="orders">
+            <i data-lucide="shopping-bag"></i> Customer Orders
+          </div>
+          <div class="menu-item" data-tab="enquiries">
+            <i data-lucide="message-square"></i> Form Enquiries
+          </div>
+          <div class="menu-item" data-tab="reviews">
+            <i data-lucide="star"></i> Manage Reviews
+          </div>
+          <div class="menu-item" data-tab="settings">
+            <i data-lucide="settings"></i> System Settings
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <a href="index.html" target="_blank" style="font-size:0.75rem; color:#aaa; display:flex; align-items:center; gap:8px;"><i data-lucide="external-link" style="width:12px;height:12px;"></i> View Storefront</a>
+        </div>
+      </aside>
+
+      <!-- Main Contents Container -->
+      <main class="admin-content">
+
+        <!-- ==========================================
+             TAB: OVERVIEW
+             ========================================== -->
+        <section id="tab-overview" class="tab-section active">
+          <div class="content-header">
+            <div>
+              <h1>Overview Dashboard</h1>
+              <p>Key statistics, showroom performance indicators, and recent records.</p>
+            </div>
+          </div>
+
+          <!-- Stats Widgets Grid -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-info">
+                <h3>Total Products</h3>
+                <p id="stat-products-count">0</p>
+              </div>
+              <div class="stat-icon">
+                <i data-lucide="package"></i>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-info">
+                <h3>Total Orders</h3>
+                <p id="stat-orders-count">0</p>
+              </div>
+              <div class="stat-icon">
+                <i data-lucide="shopping-bag"></i>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-info">
+                <h3>Sales Sourced</h3>
+                <p id="stat-sales-total">₹0</p>
+              </div>
+              <div class="stat-icon">
+                <i data-lucide="dollar-sign"></i>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-info">
+                <h3>Enquiries Recieved</h3>
+                <p id="stat-enquiries-count">0</p>
+              </div>
+              <div class="stat-icon">
+                <i data-lucide="message-square"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activity Row -->
+          <div class="dashboard-tables-grid">
+            <!-- Recent Orders -->
+            <div class="panel">
+              <div class="panel-title">
+                <span>Recent Showroom Orders</span>
+                <button class="btn btn-outline btn-sm btn-go-tab" data-tab="orders">View All</button>
+              </div>
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Order ID</th>
+                      <th>Customer</th>
+                      <th>Total</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="overview-orders-tbody">
+                    <!-- Injected dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Recent Enquiries -->
+            <div class="panel">
+              <div class="panel-title">
+                <span>Recent Enquiries</span>
+                <button class="btn btn-outline btn-sm btn-go-tab" data-tab="enquiries">View All</button>
+              </div>
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Customer</th>
+                      <th>Interest</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="overview-enquiries-tbody">
+                    <!-- Injected dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==========================================
+             TAB: MANAGE CATEGORIES (CRUD)
+             ========================================== -->
+        <section id="tab-categories" class="tab-section">
+          <div class="content-header">
+            <div>
+              <h1>Manage Categories</h1>
+              <p>Add new design categories, edit descriptions, and delete unneeded collections.</p>
+            </div>
+            <button id="btn-add-category" class="btn btn-gold"><i data-lucide="plus" style="width:16px;height:16px;margin-right:8px;"></i>Add Category</button>
+          </div>
+
+          <!-- Categories List Table -->
+          <div class="dashboard-card" style="margin-top:1.5rem;">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Image</th>
+                    <th>Category Name</th>
+                    <th>Category ID</th>
+                    <th>Description</th>
+                    <th style="text-align:right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="categories-table-tbody">
+                  <!-- Injected dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==========================================
+             TAB: MANAGE PRODUCTS (CRUD)
+             ========================================== -->
+        <section id="tab-products" class="tab-section">
+          <div class="content-header">
+            <div>
+              <h1>Manage Inventory</h1>
+              <p>Add new imports, adjust pricing discounts, and delete specific pieces.</p>
+            </div>
+            <div>
+              <button id="btn-add-product" class="btn btn-gold"><i data-lucide="plus" style="width:16px;height:16px;margin-right:8px;"></i>Add Product</button>
+            </div>
+          </div>
+
+          <!-- Filters Row -->
+          <div class="controls-row">
+            <div class="search-filter-box">
+              <input type="text" id="product-search-input" class="form-control" placeholder="Search product catalogue by name...">
+              <select id="product-category-filter" class="form-control" style="max-width:180px;">
+                <option value="all">All Categories</option>
+                <!-- Injected dynamically -->
+              </select>
+            </div>
+          </div>
+
+          <!-- Products Table -->
+          <div class="panel" style="padding:0; overflow:hidden;">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Thumbnail</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Original Price</th>
+                    <th>Offer Price</th>
+                    <th>Stock Status</th>
+                    <th style="text-align:right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="products-table-tbody">
+                  <!-- Injected dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==========================================
+             TAB: MANAGE ORDERS
+             ========================================== -->
+        <section id="tab-orders" class="tab-section">
+          <div class="content-header">
+            <div>
+              <h1>Customer Orders</h1>
+              <p>Review customer deliveries, update payment status, and edit order progress timelines.</p>
+            </div>
+          </div>
+
+          <!-- Orders Panel List -->
+          <div class="panel" style="padding:0; overflow:hidden;">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Customer Name</th>
+                    <th>Date</th>
+                    <th>Payment Method</th>
+                    <th>Payment Status</th>
+                    <th>Total</th>
+                    <th>Order Status</th>
+                    <th style="text-align:right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="orders-table-tbody">
+                  <!-- Injected dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==========================================
+             TAB: MANAGE ENQUIRIES
+             ========================================== -->
+        <section id="tab-enquiries" class="tab-section">
+          <div class="content-header">
+            <div>
+              <h1>Form Enquiries</h1>
+              <p>Submitted messages and interest files from the website contact blocks.</p>
+            </div>
+            <button id="btn-clear-enquiries" class="btn btn-danger btn-sm"><i data-lucide="trash-2" style="width:14px;height:14px;margin-right:6px;"></i>Clear All Logs</button>
+          </div>
+
+          <div class="panel" style="padding:0; overflow:hidden;">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Customer Info</th>
+                    <th>Email Address</th>
+                    <th>Interest Sourced</th>
+                    <th>Message Submission</th>
+                    <th>Received Date</th>
+                  </tr>
+                </thead>
+                <tbody id="enquiries-table-tbody">
+                  <!-- Injected dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==========================================
+             TAB: MANAGE REVIEWS
+             ========================================== -->
+        <section id="tab-reviews" class="tab-section">
+          <div class="content-header">
+            <div>
+              <h1>Manage Reviews</h1>
+              <p>View, manage, and delete customer reviews displayed in the Client Stories section.</p>
+            </div>
+          </div>
+
+          <div class="panel" style="padding:0; overflow:hidden;">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Customer Name</th>
+                    <th>Role/Location</th>
+                    <th>Rating</th>
+                    <th>Review Content</th>
+                    <th style="text-align:right; padding-right: 2rem;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="reviews-table-tbody">
+                  <!-- Injected dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==========================================
+             TAB: SYSTEM SETTINGS
+             ========================================== -->
+        <section id="tab-settings" class="tab-section">
+          <div class="content-header">
+            <div>
+              <h1>System Settings</h1>
+              <p>Configure product categories, promo discount codes, and overall website headers.</p>
+            </div>
+          </div>
+
+          <div class="settings-grid">
+            <!-- Store Profile Details -->
+            <div class="panel">
+              <div class="panel-title">
+                <span>Web Store Profile</span>
+              </div>
+              <form id="settings-store-form">
+                <div class="form-group">
+                  <label for="set-phone">Phone number</label>
+                  <input type="text" id="set-phone" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label for="set-email">Email Address</label>
+                  <input type="email" id="set-email" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label for="set-hours">Operating Hours</label>
+                  <input type="text" id="set-hours" class="form-control" placeholder="Mon - Sun: 9:30 AM - 8:30 PM" required>
+                </div>
+                <div class="form-group">
+                  <label for="set-address">Showroom Address</label>
+                  <textarea id="set-address" class="form-control" rows="4" required></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="set-razorpay-key">Razorpay Key ID (For Online Payments)</label>
+                  <input type="text" id="set-razorpay-key" class="form-control" placeholder="e.g. rzp_test_xxxxxxxxxxxxxx">
+                  <span style="font-size: 0.72rem; color: #777; margin-top: 4px; display: block;">Leave blank to disable online UPI/card payments on checkout.</span>
+                </div>
+                <button type="submit" class="btn btn-gold btn-sm">Save Config Profile</button>
+              </form>
+            </div>
+
+            <!-- Categories and Active Coupons Panel -->
+            <div>
+              <!-- Active Promo Coupons -->
+              <div class="panel">
+                <div class="panel-title">
+                  <span>Active Coupon Codes</span>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                  <form id="settings-coupon-form" style="display:flex; gap:0.5rem;">
+                    <input type="text" id="coupon-new-code" class="form-control" placeholder="PROMO20" required style="text-transform:uppercase;">
+                    <input type="number" id="coupon-new-val" class="form-control" placeholder="20 (% discount)" required min="1" max="99" style="max-width:120px;">
+                    <button type="submit" class="btn btn-black btn-sm">Add</button>
+                  </form>
+                </div>
+                <div class="table-responsive">
+                  <table class="admin-table">
+                    <thead>
+                      <tr>
+                        <th>Promo Code</th>
+                        <th>Discount Value</th>
+                        <th style="text-align:right;">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="coupons-table-tbody">
+                      <!-- Injected dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Categories Manager -->
+              <div class="panel">
+                <div class="panel-title">
+                  <span>Product Categories</span>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                  <form id="settings-category-form" style="display:flex; gap:0.5rem;">
+                    <input type="text" id="cat-new-id" class="form-control" placeholder="category-id" required style="max-width:160px; text-transform:lowercase;">
+                    <input type="text" id="cat-new-name" class="form-control" placeholder="Display Name" required>
+                    <button type="submit" class="btn btn-black btn-sm">Add</button>
+                  </form>
+                </div>
+                <div class="table-responsive">
+                  <table class="admin-table">
+                    <thead>
+                      <tr>
+                        <th>ID Key</th>
+                        <th>Category Name</th>
+                        <th style="text-align:right;">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="settings-categories-table-tbody">
+                      <!-- Injected dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL: ADD / EDIT PRODUCT
+       ========================================================================== -->
+  <div id="product-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="product-modal-title">Add New Product</h2>
+        <button id="close-product-modal" class="close-modal-btn"><i data-lucide="x"></i></button>
+      </div>
+      <form id="product-form">
+        <input type="hidden" id="form-product-index">
+        <div class="form-group">
+          <label for="form-pname">Product Name</label>
+          <input type="text" id="form-pname" class="form-control" placeholder="e.g. Bespoke Golden Chandelier" required>
+        </div>
+        <div class="form-group">
+          <label for="form-pcategory">Category</label>
+          <select id="form-pcategory" class="form-control" required>
+            <!-- Injected dynamically -->
+          </select>
+        </div>
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+          <div class="form-group">
+            <label for="form-pprice">Original Price (₹)</label>
+            <input type="number" id="form-pprice" class="form-control" placeholder="25000" required>
+          </div>
+          <div class="form-group">
+            <label for="form-pofferprice">Offer Discount Price (₹ - Optional)</label>
+            <input type="number" id="form-pofferprice" class="form-control" placeholder="19999">
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 1rem;">
+          <label for="form-pshipping">Shipping Surcharge (₹ - Enter 0 for Free)</label>
+          <input type="number" id="form-pshipping" class="form-control" placeholder="0" required>
+        </div>
+
+        <div class="form-group">
+          <label>Product Image</label>
+          <!-- Hidden file input -->
+          <input type="file" id="form-pimage-file" accept="image/*" multiple style="display:none;">
+          <!-- Hidden field stores JSON array of base64 -->
+          <input type="hidden" id="form-pimage" value="[]">
+
+          <div class="img-upload-widget" id="img-upload-widget">
+            <!-- Live gallery preview -->
+            <div id="img-upload-gallery" class="img-upload-gallery"></div>
+
+            <!-- Placeholder icon shown when no image -->
+            <div class="img-upload-placeholder" id="img-upload-placeholder">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <div>Drag &amp; drop image here or click <strong style="color:var(--color-accent);">Upload</strong></div>
+              <div style="font-size:0.7rem; margin-top:4px;">JPG, PNG, WEBP supported</div>
+            </div>
+
+            <!-- Action row -->
+            <div class="img-upload-actions">
+              <label class="img-upload-label" for="form-pimage-file">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+                Upload Image(s)
+              </label>
+              <span class="img-upload-filename" id="img-upload-filename">Up to 5 images allowed</span>
+              <button type="button" class="img-clear-btn" id="img-clear-btn" onclick="clearProductImage()">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Clear All
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="form-pshortdesc">Short Description (Grid card view)</label>
+          <input type="text" id="form-pshortdesc" class="form-control" placeholder="Luxurious wall showpiece detail card description." required>
+        </div>
+        <div class="form-group">
+          <label for="form-pdesc">Full Description (Detail page zoom view)</label>
+          <textarea id="form-pdesc" class="form-control" rows="3" placeholder="Describe the texture, feel, weight, design, imports coordinates..." required></textarea>
+        </div>
+
+        <!-- Specifications Grid -->
+        <div class="specs-form-grid">
+          <h4>Technical Specifications</h4>
+          <div class="form-group">
+            <label for="form-spec-dimensions">Dimensions</label>
+            <input type="text" id="form-spec-dimensions" class="form-control" placeholder="130cm Length x 80cm Height" required>
+          </div>
+          <div class="form-group">
+            <label for="form-spec-material">Material</label>
+            <input type="text" id="form-spec-material" class="form-control" placeholder="Premium High-grade Galvanized Iron" required>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="form-spec-finish">Finish / Detail</label>
+            <input type="text" id="form-spec-finish" class="form-control" placeholder="Electroplated Glossy Gold finish" required>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="form-spec-power">Power / Weight (Optional)</label>
+            <input type="text" id="form-spec-power" class="form-control" placeholder="Silent Sweep Movement, Anti-rust coat">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="form-pstockcount">Stock Quantity (Number of items available)</label>
+          <input type="number" id="form-pstockcount" class="form-control" value="5" min="0" required>
+        </div>
+
+        <button type="submit" class="btn btn-gold btn-block" style="width:100%; margin-top:1.5rem;">Save Sourced Record</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL: ADD/EDIT CATEGORY
+       ========================================================================== -->
+  <div id="category-modal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 id="category-modal-title">Add New Category</h2>
+        <button id="close-category-modal" class="close-modal-btn"><i data-lucide="x"></i></button>
+      </div>
+      <form id="category-form" autocomplete="off">
+        <input type="hidden" id="form-category-index">
+        
+        <div class="form-group">
+          <label for="form-cname">Category Name</label>
+          <input type="text" id="form-cname" autocomplete="off" class="form-control" placeholder="e.g. Designer Fountains" required>
+        </div>
+
+        <div class="form-group">
+          <label for="form-cid">Category ID (Unique Slug)</label>
+          <input type="text" id="form-cid" autocomplete="off" class="form-control" placeholder="e.g. designer-fountains" required>
+          <span style="font-size:0.7rem; color:#aaa; margin-top:4px; display:block;">Lowercase letters and hyphens only. Used for route filtering.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="form-cdesc">Description</label>
+          <textarea id="form-cdesc" class="form-control" placeholder="Brief description of this collection..." rows="3" required style="resize:vertical;"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Category Cover Image</label>
+          <!-- Hidden file input -->
+          <input type="file" id="form-cimage-file" accept="image/*" style="display:none;">
+          <!-- Hidden field stores filename or base64 -->
+          <input type="hidden" id="form-cimage">
+
+          <div class="img-upload-widget" id="cimg-upload-widget">
+            <!-- Live preview -->
+            <img id="cimg-upload-preview" class="img-upload-preview" alt="Category preview" src="" style="display:none; max-height:150px; width:100%; object-fit:cover; border-radius:var(--border-radius-sm);">
+
+            <!-- Placeholder icon shown when no image -->
+            <div class="img-upload-placeholder" id="cimg-upload-placeholder">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <div>Drag &amp; drop image here or click <strong style="color:var(--color-accent);">Upload</strong></div>
+              <div style="font-size:0.7rem; margin-top:4px;">JPG, PNG, WEBP supported</div>
+            </div>
+
+            <!-- Action row -->
+            <div class="img-upload-actions" id="cimg-upload-actions" style="display:none; justify-content:center; gap:8px; margin-top:8px;">
+              <button type="button" class="btn btn-outline btn-sm" id="btn-cimage-clear" style="border-color:#ff4d4d; color:#ff4d4d;">Clear Image</button>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-gold btn-block" style="width:100%; margin-top:1.5rem;">Save Category</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL: ORDER DETAILS
+       ========================================================================== -->
+  <div id="order-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Order Information Details</h2>
+        <button id="close-order-modal" class="close-modal-btn"><i data-lucide="x"></i></button>
+      </div>
+      <div class="order-summary-box">
+        <div class="order-details-grid">
+          <div><span class="order-details-label">Order Number:</span> <strong id="ord-view-id">GD-128383</strong></div>
+          <div><span class="order-details-label">Date Sourced:</span> <span id="ord-view-date">17/07/2026</span></div>
+          <div><span class="order-details-label">Customer Name:</span> <span id="ord-view-customer">Selvaraj</span></div>
+          <div><span class="order-details-label">Phone Coordinates:</span> <span id="ord-view-phone">8608738393</span></div>
+          <div style="grid-column: span 2;"><span class="order-details-label">Shipping Address:</span> <span id="ord-view-address">Vijayamangalam, Erode</span></div>
+          <div><span class="order-details-label">Payment Method:</span> <span id="ord-view-payment">Cash on Delivery</span></div>
+          <div><span class="order-details-label">Payment Status:</span> <span id="ord-view-paystatus" class="payment-badge payment-pending">Pending</span></div>
+        </div>
+
+        <!-- Items Table -->
+        <table class="admin-table" style="margin-top:1.2rem; background-color:#fff;">
+          <thead>
+            <tr>
+              <th>Product Selection</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="ord-view-items-tbody">
+            <!-- Injected dynamically -->
+          </tbody>
+        </table>
+
+        <!-- Order Log Status update -->
+        <div class="order-history-timeline" id="ord-view-timeline">
+          <!-- Timeline entries injected dynamically -->
+        </div>
+      </div>
+
+      <!-- Action Forms inside Details Modal -->
+      <form id="order-update-form" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+        <input type="hidden" id="form-order-index">
+        <div class="form-group">
+          <label for="form-order-status">Update Order State</label>
+          <select id="form-order-status" class="form-control">
+            <option value="New">New Order</option>
+            <option value="Processing">Processing / Sourcing</option>
+            <option value="Shipped">Shipped / Dispatched</option>
+            <option value="Delivered">Delivered & Assembled</option>
+            <option value="Cancelled">Cancelled Sourcing</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="form-order-payment">Update Payment State</label>
+          <select id="form-order-payment" class="form-control">
+            <option value="Pending">Pending Surcharge</option>
+            <option value="Paid">Fully Paid (COD/Online)</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column: span 2; margin-bottom: 0;">
+          <label for="form-order-note">Timeline Note (Optional)</label>
+          <input type="text" id="form-order-note" class="form-control" placeholder="e.g. Container dispatched from warehouse.">
+        </div>
+        <button type="submit" class="btn btn-gold btn-block" style="grid-column: span 2; margin-top:1rem;">Submit Update Record</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       APP BUSINESS LOGIC SCRIPT
+       ========================================================================== -->
+  <script src="/js/data.js"></script>
+  <script src="/js/api.js"></script>
+  <script>
+    // 1. Initial State Fallback Setup
+    const defaultCoupons = [
+      { code: "WELCOME10", discount: 10 }
+    ];
+
+    // Initialize LocalStorage Data if not present
+    if (!localStorage.getItem("gd_products")) localStorage.setItem("gd_products", JSON.stringify(window.GALAXY_DECOR_DB.products));
+    if (!localStorage.getItem("gd_categories")) localStorage.setItem("gd_categories", JSON.stringify(window.GALAXY_DECOR_DB.categories));
+    if (!localStorage.getItem("gd_store")) localStorage.setItem("gd_store", JSON.stringify(window.GALAXY_DECOR_DB.store));
+    if (!localStorage.getItem("gd_coupons")) localStorage.setItem("gd_coupons", JSON.stringify(defaultCoupons));
+    if (!localStorage.getItem("gd_orders")) localStorage.setItem("gd_orders", JSON.stringify([]));
+    if (!localStorage.getItem("gd_enquiries")) localStorage.setItem("gd_enquiries", JSON.stringify([]));
+    if (!localStorage.getItem("gd_reviews")) localStorage.setItem("gd_reviews", JSON.stringify(window.GALAXY_DECOR_DB.reviews));
+
+    // State Variables
+    let products = JSON.parse(localStorage.getItem("gd_products"));
+    let categories = JSON.parse(localStorage.getItem("gd_categories"));
+    let store = JSON.parse(localStorage.getItem("gd_store"));
+    let coupons = JSON.parse(localStorage.getItem("gd_coupons"));
+    let orders = JSON.parse(localStorage.getItem("gd_orders"));
+    let enquiries = JSON.parse(localStorage.getItem("gd_enquiries"));
+    let reviews = JSON.parse(localStorage.getItem("gd_reviews"));
+
+    // --- Copy Credential Helper ---
+    window.copyCredential = function(elementId, btn) {
+      const text = document.getElementById(elementId).textContent.trim();
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btn.innerHTML;
+        btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.innerHTML = original;
+          btn.classList.remove("copied");
+        }, 2000);
+      }).catch(() => {
+        // Fallback for older browsers
+        const el = document.getElementById(elementId);
+        const range = document.createRange();
+        range.selectNode(el);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        document.execCommand("copy");
+        window.getSelection().removeAllRanges();
+        btn.textContent = "Copied!";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy`;
+          btn.classList.remove("copied");
+        }, 2000);
+      });
+    };
+
+    // DOM Elements Cache
+    const loginScreen = document.getElementById("login-screen");
+    const appScreen = document.getElementById("admin-dashboard-app");
+    const loginForm = document.getElementById("admin-login-form");
+    const loginError = document.getElementById("login-error-alert");
+
+    // Check Auth State on Load
+    document.addEventListener("DOMContentLoaded", () => {
+      if (sessionStorage.getItem("gd_admin_logged_in") === "true") {
+        showDashboard();
+      }
+      lucide.createIcons();
+    });
+
+    // 2. Auth Actions
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const user = document.getElementById("username").value.trim();
+      const pass = document.getElementById("password").value;
+
+      if (user === "admin" && pass === "galaxy123") {
+        sessionStorage.setItem("gd_admin_logged_in", "true");
+        loginError.style.display = "none";
+        showDashboard();
+      } else {
+        loginError.style.display = "block";
+      }
+    });
+
+    document.getElementById("btn-logout").addEventListener("click", () => {
+      sessionStorage.removeItem("gd_admin_logged_in");
+      appScreen.style.display = "none";
+      loginScreen.style.display = "flex";
+      loginForm.reset();
+    });
+
+    async function showDashboard() {
+      loginScreen.style.display = "none";
+      appScreen.style.display = "block";
+      
+      // Sync with real backend before rendering
+      if (window.GalaxyAPI) {
+        document.getElementById("btn-logout").innerHTML = `<i data-lucide="loader" class="spin"></i> Syncing...`;
+        await window.GalaxyAPI.fetchAllData();
+        await window.GalaxyAPI.fetchAdminData();
+        
+        // Re-read synced data into state variables
+        products = JSON.parse(localStorage.getItem("gd_products")) || [];
+        categories = JSON.parse(localStorage.getItem("gd_categories")) || [];
+        store = JSON.parse(localStorage.getItem("gd_store")) || {};
+        coupons = JSON.parse(localStorage.getItem("gd_coupons")) || [];
+        orders = JSON.parse(localStorage.getItem("gd_orders")) || [];
+        enquiries = JSON.parse(localStorage.getItem("gd_enquiries")) || [];
+        reviews = JSON.parse(localStorage.getItem("gd_reviews")) || [];
+        
+        document.getElementById("btn-logout").innerHTML = `<i data-lucide="log-out"></i> Logout`;
+      }
+
+      initTabNavigation();
+      loadAllStats();
+      renderOverviewTab();
+      renderCategoriesTab();
+      renderProductsTab();
+      renderOrdersTab();
+      renderEnquiriesTab();
+      renderSettingsTab();
+      populateFormDropdowns();
+      lucide.createIcons();
+    }
+
+    // 3. Tab Navigation Manager
+    function initTabNavigation() {
+      const menuItems = document.querySelectorAll(".menu-item");
+      const tabSections = document.querySelectorAll(".tab-section");
+
+      menuItems.forEach(item => {
+        item.addEventListener("click", () => {
+          const tab = item.getAttribute("data-tab");
+          
+          menuItems.forEach(mi => mi.classList.remove("active"));
+          item.classList.add("active");
+
+          tabSections.forEach(sec => sec.classList.remove("active"));
+          document.getElementById("tab-" + tab).classList.add("active");
+          
+          // Custom tab reload logic
+          if (tab === "overview") renderOverviewTab();
+          else if (tab === "categories") renderCategoriesTab();
+          else if (tab === "products") renderProductsTab();
+          else if (tab === "orders") renderOrdersTab();
+          else if (tab === "enquiries") renderEnquiriesTab();
+          else if (tab === "reviews") renderReviewsTab();
+          else if (tab === "settings") renderSettingsTab();
+          
+          lucide.createIcons();
+        });
+      });
+
+      // Quick tab redirect buttons
+      document.querySelectorAll(".btn-go-tab").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const targetTab = btn.getAttribute("data-tab");
+          const correspondingMenuItem = document.querySelector(`.menu-item[data-tab="${targetTab}"]`);
+          if (correspondingMenuItem) correspondingMenuItem.click();
+        });
+      });
+    }
+
+    // Save helpers
+    function saveProducts() {
+      localStorage.setItem("gd_products", JSON.stringify(products));
+      loadAllStats();
+    }
+
+    // Update references when loaded via local storage
+    window.addEventListener("storage", (e) => {
+      if (e.key === "gd_products") {
+        products = JSON.parse(e.newValue);
+        loadAllStats();
+        if (document.getElementById("tab-products").classList.contains("active")) renderProductsTab();
+      } else if (e.key === "gd_orders") {
+        orders = JSON.parse(e.newValue);
+        loadAllStats();
+        if (document.getElementById("tab-orders").classList.contains("active")) renderOrdersTab();
+      } else if (e.key === "gd_enquiries") {
+        enquiries = JSON.parse(e.newValue);
+        loadAllStats();
+        if (document.getElementById("tab-enquiries").classList.contains("active")) renderEnquiriesTab();
+      } else if (e.key === "gd_categories") {
+        categories = JSON.parse(e.newValue);
+        populateFormDropdowns();
+        if (document.getElementById("tab-categories").classList.contains("active")) renderCategoriesTab();
+      }
+    });
+
+    function saveOrders() {
+      localStorage.setItem("gd_orders", JSON.stringify(orders));
+      loadAllStats();
+    }
+
+    function saveEnquiries() {
+      localStorage.setItem("gd_enquiries", JSON.stringify(enquiries));
+      loadAllStats();
+    }
+
+    function saveReviews() {
+      localStorage.setItem("gd_reviews", JSON.stringify(reviews));
+      if (document.getElementById("tab-reviews").classList.contains("active")) renderReviewsTab();
+    }
+
+    function saveCategories() {
+      localStorage.setItem("gd_categories", JSON.stringify(categories));
+      populateFormDropdowns();
+      if (document.getElementById("tab-categories").classList.contains("active")) renderCategoriesTab();
+    }
+
+    function saveStoreConfig() {
+      localStorage.setItem("gd_store", JSON.stringify(store));
+    }
+
+    function saveCoupons() {
+      localStorage.setItem("gd_coupons", JSON.stringify(coupons));
+    }
+
+    // Stats calculations
+    function loadAllStats() {
+      document.getElementById("stat-products-count").textContent = products.length;
+      document.getElementById("stat-orders-count").textContent = orders.length;
+      document.getElementById("stat-enquiries-count").textContent = enquiries.length;
+
+      let sales = orders
+        .filter(o => o.orderStatus === "Delivered" || o.orderStatus === "New" || o.orderStatus === "Processing" || o.orderStatus === "Shipped")
+        .reduce((sum, o) => sum + o.total, 0);
+      document.getElementById("stat-sales-total").textContent = "₹" + sales.toLocaleString();
+    }
+
+    // Category names map helper
+    function getCategoryName(catId) {
+      let cat = categories.find(c => c.id === catId);
+      return cat ? cat.name : catId;
+    }
+
+    // Image vector fallback helper — supports filename, base64 data URLs
+    function renderProductImageHTML(product, className = "") {
+      const img = product.image || "";
+      if (!img || img.startsWith("default_") || img.startsWith("placeholder")) {
+        return `<div class="${className}" style="display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #ddd;font-size:0.55rem;font-weight:700;color:#C9A227;height:48px;width:48px;text-transform:uppercase;">${product.category.substring(0,3)}</div>`;
+      }
+      // Base64 uploaded image — use directly
+      if (img.startsWith("data:")) {
+        return `<img src="${img}" alt="${product.name}" class="${className}" style="object-fit:cover;">`;
+      }
+      // Regular filename — resolve from assets folder
+      return `<img src="/assets/products/${img}" alt="${product.name}" class="${className}" onerror="this.outerHTML='<div class=\\'${className}\\' style=\\'display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #ddd;font-size:0.55rem;font-weight:700;color:#C9A227;height:48px;width:48px;\\'>${product.category.substring(0,3)}</div>'">`;
+    }
+
+    // Populate Category dropdown lists inside modal
+    function populateFormDropdowns() {
+      const pCatFilter = document.getElementById("product-category-filter");
+      const formCat = document.getElementById("form-pcategory");
+
+      // Filter option
+      pCatFilter.innerHTML = '<option value="all">All Categories</option>' + 
+        categories.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+
+      // Add product modal options
+      formCat.innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+    }
+
+    // ==========================================
+    // RENDER TAB: OVERVIEW
+    // ==========================================
+    function renderOverviewTab() {
+      const ordersTbody = document.getElementById("overview-orders-tbody");
+      const enquiriesTbody = document.getElementById("overview-enquiries-tbody");
+
+      // 5 Recent orders
+      let recentOrders = orders.slice().reverse().slice(0, 5);
+      if (recentOrders.length === 0) {
+        ordersTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999;">No orders reserved.</td></tr>';
+      } else {
+        ordersTbody.innerHTML = recentOrders.map(o => `
+          <tr>
+            <td><strong>${o.orderId}</strong></td>
+            <td>${o.name}</td>
+            <td>₹${o.total.toLocaleString()}</td>
+            <td><span class="status-badge status-${o.orderStatus.toLowerCase()}">${o.orderStatus}</span></td>
+          </tr>
+        `).join("");
+      }
+
+      // 5 Recent enquiries
+      let recentEnquiries = enquiries.slice().reverse().slice(0, 5);
+      if (recentEnquiries.length === 0) {
+        enquiriesTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">No form enquiries.</td></tr>';
+      } else {
+        enquiriesTbody.innerHTML = recentEnquiries.map(e => `
+          <tr>
+            <td><strong>${e.name}</strong><br><span style="font-size:0.75rem;color:#777;">${e.phone}</span></td>
+            <td>${getCategoryName(e.interest)}</td>
+            <td style="color:#777;">${e.date.split(",")[0]}</td>
+          </tr>
+        `).join("");
+      }
+    }
+
+    // ==========================================
+    // RENDER TAB: INVENTORY / PRODUCTS CRUD
+    // ==========================================
+    const prodModal = document.getElementById("product-modal");
+    const closeProdModal = document.getElementById("close-product-modal");
+    const productForm = document.getElementById("product-form");
+    const searchInput = document.getElementById("product-search-input");
+    const filterCat = document.getElementById("product-category-filter");
+
+    // Search and filter listeners
+    searchInput.addEventListener("input", renderProductsTab);
+    filterCat.addEventListener("change", renderProductsTab);
+
+    document.getElementById("btn-add-product").addEventListener("click", () => {
+      openProductModal();
+    });
+
+    closeProdModal.addEventListener("click", () => {
+      prodModal.classList.remove("active");
+    });
+
+    function openProductModal(index = null) {
+      const title = document.getElementById("product-modal-title");
+      const indexInput = document.getElementById("form-product-index");
+
+      productForm.reset();
+      document.getElementById("form-pshipping").value = "0";
+      clearProductImage(); // reset image widget each time
+
+      if (index !== null) {
+        let p = products[index];
+        title.textContent = "Edit Product Record";
+        indexInput.value = index;
+
+        document.getElementById("form-pname").value = p.name;
+        document.getElementById("form-pcategory").value = p.category;
+        document.getElementById("form-pprice").value = p.price;
+        document.getElementById("form-pofferprice").value = p.offerPrice || "";
+        document.getElementById("form-pshipping").value = p.shipping || 0;
+        document.getElementById("form-pshortdesc").value = p.shortDesc;
+        document.getElementById("form-pdesc").value = p.desc;
+
+        document.getElementById("form-spec-dimensions").value = p.specs.Dimensions || "";
+        document.getElementById("form-spec-material").value = p.specs.Material || "";
+        document.getElementById("form-spec-finish").value = p.specs.Finish || "";
+        document.getElementById("form-spec-power").value = p.specs.Power || p.specs.Quantity || p.specs.Features || "";
+        document.getElementById("form-pstockcount").value = p.stockCount !== undefined ? p.stockCount : (p.inStock ? 5 : 0);
+
+        // Populate image widget with existing images
+        window.currentFormGallery = p.gallery && p.gallery.length > 0 ? [...p.gallery] : (p.image ? [p.image] : []);
+        document.getElementById("form-pimage").value = JSON.stringify(window.currentFormGallery);
+        renderProductGallery();
+      } else {
+        title.textContent = "Add New Showroom Product";
+        indexInput.value = "";
+      }
+
+      prodModal.classList.add("active");
+    }
+
+    // ── Image Upload Widget Logic ───────────────────────────────────────────
+    window.currentFormGallery = [];
+
+    window.clearProductImage = function() {
+      window.currentFormGallery = [];
+      document.getElementById("form-pimage").value = "[]";
+      document.getElementById("form-pimage-file").value = "";
+      renderProductGallery();
+    };
+
+    window.removeProductGalleryImage = function(idx) {
+      window.currentFormGallery.splice(idx, 1);
+      document.getElementById("form-pimage").value = JSON.stringify(window.currentFormGallery);
+      renderProductGallery();
+    };
+
+    function renderProductGallery() {
+      const galleryEl = document.getElementById("img-upload-gallery");
+      const placeholder = document.getElementById("img-upload-placeholder");
+      const fname = document.getElementById("img-upload-filename");
+      const clearBtn = document.getElementById("img-clear-btn");
+      
+      galleryEl.innerHTML = "";
+      
+      if (window.currentFormGallery.length > 0) {
+        placeholder.classList.add("hidden");
+        clearBtn.classList.add("visible");
+        fname.textContent = window.currentFormGallery.length + " image(s) selected (Max 5)";
+        
+        window.currentFormGallery.forEach((imgVal, idx) => {
+          const src = imgVal.startsWith("data:") ? imgVal : "assets/products/" + imgVal;
+          const thumbWrap = document.createElement("div");
+          thumbWrap.className = "img-upload-thumb-wrap";
+          thumbWrap.innerHTML = `
+            <img class="img-upload-thumb" src="${src}" alt="Preview ${idx+1}">
+            <button type="button" class="img-upload-thumb-remove" title="Remove image" onclick="removeProductGalleryImage(${idx})">×</button>
+          `;
+          galleryEl.appendChild(thumbWrap);
+        });
+      } else {
+        placeholder.classList.remove("hidden");
+        clearBtn.classList.remove("visible");
+        fname.textContent = "Up to 5 images allowed";
+      }
+    }
+
+    function applyUploadedImages(files) {
+      if (!files || files.length === 0) return;
+      
+      let filesToProcess = Array.from(files).filter(f => f.type.startsWith("image/"));
+      let availableSlots = 5 - window.currentFormGallery.length;
+      if (filesToProcess.length > availableSlots) {
+        window.GalaxyUtils.showToast(`Only ${availableSlots} more image(s) can be added. (Max 5)`, "error");
+        filesToProcess = filesToProcess.slice(0, availableSlots);
+      }
+      
+      if (filesToProcess.length === 0) return;
+      
+      let processedCount = 0;
+      filesToProcess.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          window.currentFormGallery.push(e.target.result);
+          processedCount++;
+          if (processedCount === filesToProcess.length) {
+            document.getElementById("form-pimage").value = JSON.stringify(window.currentFormGallery);
+            renderProductGallery();
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // File input change
+    document.getElementById("form-pimage-file").addEventListener("change", function() {
+      applyUploadedImages(this.files);
+      this.value = ""; // reset to allow re-selection
+    });
+
+    // Drag & drop on widget
+    const uploadWidget = document.getElementById("img-upload-widget");
+    uploadWidget.addEventListener("dragover", (e) => { e.preventDefault(); uploadWidget.classList.add("dragover"); });
+    uploadWidget.addEventListener("dragleave", () => { uploadWidget.classList.remove("dragover"); });
+    uploadWidget.addEventListener("drop", (e) => {
+      e.preventDefault();
+      uploadWidget.classList.remove("dragover");
+      applyUploadedImages(e.dataTransfer.files);
+    });
+
+    // ── Global Search Bar ───────────────────────────────────────────────────
+    const globalSearchInput = document.getElementById("admin-global-search-input");
+    if (globalSearchInput) {
+      globalSearchInput.addEventListener("input", function() {
+        const q = this.value.trim().toLowerCase();
+        if (!q) return;
+        // Switch to products tab and apply search
+        document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
+        document.querySelectorAll(".admin-tab").forEach(t => t.classList.remove("active"));
+        document.querySelector(".menu-item[data-tab='products']").classList.add("active");
+        document.getElementById("tab-products").classList.add("active");
+        // Push query into product search box
+        const prodSearchBox = document.getElementById("product-search-input");
+        if (prodSearchBox) {
+          prodSearchBox.value = q;
+          prodSearchBox.dispatchEvent(new Event("input"));
+        }
+      });
+    }
+
+    // Add / Edit submission
+    productForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      
+      const idx = document.getElementById("form-product-index").value;
+      const isNew = idx === "";
+      
+      let pPrice = parseFloat(document.getElementById("form-pprice").value);
+      let pOffer = parseFloat(document.getElementById("form-pofferprice").value) || null;
+      let pShipping = parseFloat(document.getElementById("form-pshipping").value) || 0;
+
+      let specs = {
+        Dimensions: document.getElementById("form-spec-dimensions").value.trim(),
+        Material: document.getElementById("form-spec-material").value.trim(),
+        Finish: document.getElementById("form-spec-finish").value.trim()
+      };
+
+      let powerVal = document.getElementById("form-spec-power").value.trim();
+      if (powerVal) {
+        let cat = document.getElementById("form-pcategory").value;
+        if (cat === "showpieces" && powerVal.includes("Set")) specs.Quantity = powerVal;
+        else if (cat === "fountains") specs.Power = powerVal;
+        else specs.Features = powerVal;
+      }
+
+      let formImages = [];
+      try {
+        formImages = JSON.parse(document.getElementById("form-pimage").value || "[]");
+      } catch (e) {}
+
+      let imageVal = "";
+      let galleryArr = [];
+      
+      if (formImages.length > 0) {
+        imageVal = formImages[0];
+        galleryArr = formImages;
+      } else {
+        // No image in form
+        imageVal = "default_" + document.getElementById("form-pcategory").value + "_placeholder.jpg";
+        galleryArr = [imageVal];
+      }
+
+      let stockVal = parseInt(document.getElementById("form-pstockcount").value, 10);
+      let pInStock = stockVal > 0;
+
+      let productObj = {
+        id: isNew ? "gd-" + Date.now() : products[idx].id,
+        name: document.getElementById("form-pname").value.trim(),
+        category: document.getElementById("form-pcategory").value,
+        shortDesc: document.getElementById("form-pshortdesc").value.trim(),
+        desc: document.getElementById("form-pdesc").value.trim(),
+        price: pPrice,
+        offerPrice: pOffer,
+        shipping: pShipping,
+        image: imageVal,
+        gallery: galleryArr,
+        isNew: isNew ? true : (products[idx].isNew || false),
+        inStock: pInStock,
+        stockCount: stockVal,
+        specs: specs
+      };
+
+      if (isNew) {
+        products.push(productObj);
+      } else {
+        // Keep original galleries / custom status if modified
+        products[idx] = productObj;
+      }
+
+      saveProducts();
+      
+      // Sync to real backend
+      if (window.GalaxyAPI) {
+        window.GalaxyAPI.syncEntity('products' + (!isNew ? '/' + productObj.id : ''), isNew ? 'POST' : 'PUT', productObj);
+      }
+      
+      prodModal.classList.remove("active");
+      renderProductsTab();
+      window.GalaxyUtils.showToast("Product catalogue updated successfully.");
+    });
+
+    function deleteProduct(index) {
+      if (confirm(`Are you sure you want to delete the product "${products[index].name}" from storefront?`)) {
+        const deletedId = products[index].id;
+        products.splice(index, 1);
+        saveProducts();
+        
+        // Sync delete to backend
+        if (window.GalaxyAPI) {
+          window.GalaxyAPI.deleteEntity('products', deletedId);
+        }
+        renderProductsTab();
+        window.GalaxyUtils.showToast("Product deleted from catalogue.", "info");
+      }
+    }
+
+    window.restoreDefaultProducts = function() {
+      if (confirm("Are you sure you want to restore the default demo products? This will remove your currently added test products.")) {
+        localStorage.removeItem("gd_products");
+        window.location.reload();
+      }
+    };
+
+    function renderProductsTab() {
+      const tbody = document.getElementById("products-table-tbody");
+      const query = searchInput.value.toLowerCase().trim();
+      const catFilter = filterCat.value;
+
+      let filtered = products.map((p, idx) => ({ p, idx })).filter(item => {
+        let matchQuery = item.p.name.toLowerCase().includes(query) || item.p.shortDesc.toLowerCase().includes(query);
+        let matchCat = catFilter === "all" || item.p.category === catFilter;
+        return matchQuery && matchCat;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2rem; color:#999;">No matching luxury pieces.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(item => `
+        <tr data-index="${item.idx}">
+          <td>${renderProductImageHTML(item.p, "thumb-cell")}</td>
+          <td><strong>${item.p.name}</strong><br><span style="font-size:0.75rem; color:#666;">ID: ${item.p.id}</span></td>
+          <td><span style="background-color:#eee; padding:0.15rem 0.4rem; border-radius:4px; font-size:0.75rem;">${getCategoryName(item.p.category)}</span></td>
+          <td>₹${item.p.price.toLocaleString()}</td>
+          <td>${item.p.offerPrice ? `<strong style="color:var(--color-accent);">₹${item.p.offerPrice.toLocaleString()}</strong>` : '<span style="color:#aaa;">-</span>'}</td>
+          <td><span style="font-weight:600; color:${item.p.inStock ? "var(--color-success)" : "var(--color-error)"}">${item.p.inStock ? (item.p.stockCount !== undefined ? item.p.stockCount + " in Stock" : "In Stock") : "Out of Stock"}</span></td>
+          <td style="text-align:right;">
+            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+              <button class="btn btn-outline btn-sm btn-edit-prod"><i data-lucide="edit-3" style="width:12px;height:12px;margin-right:4px;vertical-align:middle;"></i>Edit</button>
+              <button class="btn btn-danger btn-sm btn-del-prod"><i data-lucide="trash-2" style="width:12px;height:12px;margin-right:4px;vertical-align:middle;"></i>Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+
+      lucide.createIcons();
+
+      // Bind edit and delete clicks
+      tbody.querySelectorAll(".btn-edit-prod").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          let row = btn.closest("tr");
+          let idx = parseInt(row.getAttribute("data-index"));
+          openProductModal(idx);
+        });
+      });
+
+      tbody.querySelectorAll(".btn-del-prod").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          let row = btn.closest("tr");
+          let idx = parseInt(row.getAttribute("data-index"));
+          deleteProduct(idx);
+        });
+      });
+    }
+
+    // ==========================================
+    // RENDER TAB: CATEGORIES CRUD
+    // ==========================================
+    const catModal = document.getElementById("category-modal");
+    const closeCatModal = document.getElementById("close-category-modal");
+    const categoryForm = document.getElementById("category-form");
+
+    document.getElementById("btn-add-category").addEventListener("click", () => {
+      openCategoryModal();
+    });
+
+    closeCatModal.addEventListener("click", () => {
+      catModal.classList.remove("active");
+    });
+
+    // Helper to resolve fallback cover images in admin
+    function resolveCategoryFallbackUrl(categoryId) {
+      const fallbacks = {
+        "living-room": "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80",
+        "bedroom": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80",
+        "office": "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=600&q=80",
+        "dining": "https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?auto=format&fit=crop&w=600&q=80",
+        "center-tables": "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=600&q=80",
+        "tea-poys": "https://images.unsplash.com/photo-1532372320978-9b4d7a92b24d?auto=format&fit=crop&w=600&q=80",
+        "gift-items": "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=600&q=80",
+        "showpieces": "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=600&q=80",
+        "fountains": "https://images.unsplash.com/photo-1588694926280-3ae414d06ccb?auto=format&fit=crop&w=600&q=80",
+        "vases": "https://images.unsplash.com/photo-1581781870027-04212e231e96?auto=format&fit=crop&w=600&q=80",
+        "decor-accessories": "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=600&q=80",
+        "home-furniture": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=600&q=80",
+        "commercial-furniture": "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80"
+      };
+      return fallbacks[categoryId] || "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80";
+    }
+
+    function renderCategoryImageHTML(category, className = "thumb-cell") {
+      const img = category.image || "";
+      if (!img || img.startsWith("placeholder_")) {
+        const fallback = resolveCategoryFallbackUrl(category.id);
+        return `<img src="${fallback}" alt="${category.name}" class="${className}" style="object-fit:cover; width:48px; height:48px; border-radius:4px;">`;
+      }
+      if (img.startsWith("data:") || img.startsWith("http")) {
+        return `<img src="${img}" alt="${category.name}" class="${className}" style="object-fit:cover; width:48px; height:48px; border-radius:4px;">`;
+      }
+      return `<img src="/assets/products/${img}" alt="${category.name}" class="${className}" style="object-fit:cover; width:48px; height:48px; border-radius:4px;" onerror="this.src='https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80'">`;
+    }
+
+    function renderCategoriesTab() {
+      const tbody = document.getElementById("categories-table-tbody");
+      if (!tbody) return;
+
+      if (categories.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem; color:#999;">No design categories found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = categories.map((c, idx) => `
+        <tr data-index="${idx}">
+          <td>${renderCategoryImageHTML(c, "thumb-cell")}</td>
+          <td><strong>${c.name}</strong></td>
+          <td><code>${c.id}</code></td>
+          <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${c.desc || '-'}</td>
+          <td style="text-align:right;">
+            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+              <button class="btn btn-outline btn-sm btn-edit-cat"><i data-lucide="edit-3" style="width:12px;height:12px;margin-right:4px;vertical-align:middle;"></i>Edit</button>
+              <button class="btn btn-danger btn-sm btn-del-cat"><i data-lucide="trash-2" style="width:12px;height:12px;margin-right:4px;vertical-align:middle;"></i>Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+
+      lucide.createIcons();
+
+      // Bind edit and delete click handlers
+      tbody.querySelectorAll(".btn-edit-cat").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const row = btn.closest("tr");
+          const idx = parseInt(row.getAttribute("data-index"));
+          openCategoryModal(idx);
+        });
+      });
+
+      tbody.querySelectorAll(".btn-del-cat").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const row = btn.closest("tr");
+          const idx = parseInt(row.getAttribute("data-index"));
+          deleteCategory(idx);
+        });
+      });
+    }
+
+    function openCategoryModal(index = null) {
+      const title = document.getElementById("category-modal-title");
+      const indexInput = document.getElementById("form-category-index");
+      const idInput = document.getElementById("form-cid");
+
+      categoryForm.reset();
+      clearCategoryFormImage();
+
+      if (index !== null) {
+        let c = categories[index];
+        title.textContent = "Edit Category";
+        indexInput.value = index;
+
+        document.getElementById("form-cname").value = c.name;
+        idInput.value = c.id;
+        idInput.readOnly = true; // category ID shouldn't change after creation because products reference it!
+        document.getElementById("form-cdesc").value = c.desc || "";
+
+        if (c.image) {
+          const imgVal = c.image;
+          document.getElementById("form-cimage").value = imgVal;
+          const preview = document.getElementById("cimg-upload-preview");
+          const placeholder = document.getElementById("cimg-upload-placeholder");
+          const clearActions = document.getElementById("cimg-upload-actions");
+
+          const src = (imgVal.startsWith("data:") || imgVal.startsWith("http")) ? imgVal : "assets/products/" + imgVal;
+          preview.src = src;
+          preview.style.display = "block";
+          placeholder.style.display = "none";
+          clearActions.style.display = "flex";
+        }
+      } else {
+        title.textContent = "Add New Category";
+        indexInput.value = "";
+        idInput.value = "";
+        idInput.readOnly = false;
+      }
+
+      catModal.classList.add("active");
+    }
+
+    function deleteCategory(index) {
+      const cat = categories[index];
+      
+      // Prevent deleting categories that have products in them to maintain referential integrity
+      const count = products.filter(p => p.category === cat.id).length;
+      if (count > 0) {
+        alert(`Cannot delete category "${cat.name}" because it contains ${count} active product(s) in inventory. Move or delete the products first.`);
+        return;
+      }
+
+      if (confirm(`Are you sure you want to delete the category "${cat.name}"?`)) {
+        categories.splice(index, 1);
+        saveCategories();
+        renderCategoriesTab();
+        window.GalaxyUtils.showToast("Category deleted successfully.", "info");
+      }
+    }
+
+    // Category Image Drag & Drop and Upload Widget
+    window.clearCategoryFormImage = function() {
+      document.getElementById("form-cimage").value = "";
+      document.getElementById("form-cimage-file").value = "";
+      const preview = document.getElementById("cimg-upload-preview");
+      const placeholder = document.getElementById("cimg-upload-placeholder");
+      const clearActions = document.getElementById("cimg-upload-actions");
+      preview.src = "";
+      preview.style.display = "none";
+      placeholder.style.display = "block";
+      clearActions.style.display = "none";
+    };
+
+    document.getElementById("btn-cimage-clear").addEventListener("click", () => {
+      clearCategoryFormImage();
+    });
+
+    function applyUploadedCategoryImage(file) {
+      if (!file || !file.type.startsWith("image/")) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64 = e.target.result;
+        document.getElementById("form-cimage").value = base64;
+        const preview = document.getElementById("cimg-upload-preview");
+        const placeholder = document.getElementById("cimg-upload-placeholder");
+        const clearActions = document.getElementById("cimg-upload-actions");
+
+        preview.src = base64;
+        preview.style.display = "block";
+        placeholder.style.display = "none";
+        clearActions.style.display = "flex";
+      };
+      reader.readAsDataURL(file);
+    }
+
+    document.getElementById("form-cimage-file").addEventListener("change", function() {
+      if (this.files && this.files[0]) applyUploadedCategoryImage(this.files[0]);
+    });
+
+    const cUploadWidget = document.getElementById("cimg-upload-widget");
+    cUploadWidget.addEventListener("click", (e) => {
+      // Do not open file selector if clicking clear button or clear input
+      if (e.target.id === "btn-cimage-clear") return;
+      document.getElementById("form-cimage-file").click();
+    });
+
+    cUploadWidget.addEventListener("dragover", (e) => { e.preventDefault(); cUploadWidget.classList.add("dragover"); });
+    cUploadWidget.addEventListener("dragleave", () => { cUploadWidget.classList.remove("dragover"); });
+    cUploadWidget.addEventListener("drop", (e) => {
+      e.preventDefault();
+      cUploadWidget.classList.remove("dragover");
+      const file = e.dataTransfer.files[0];
+      applyUploadedCategoryImage(file);
+    });
+
+    // Auto-generate Slug/ID on name input (only when creating new)
+    document.getElementById("form-cname").addEventListener("input", function() {
+      const idx = document.getElementById("form-category-index").value;
+      if (idx === "") { // Only auto-fill if adding new
+        const name = this.value;
+        const slug = name.toLowerCase()
+                         .replace(/[^a-z0-9]+/g, "-") // replace non-alphanumeric with hyphens
+                         .replace(/(^-|-$)/g, "");   // trim leading/trailing hyphens
+        document.getElementById("form-cid").value = slug;
+      }
+    });
+
+    // Category Form Submit Listener
+    categoryForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      
+      const idx = document.getElementById("form-category-index").value;
+      const isNew = idx === "";
+      
+      const cId = document.getElementById("form-cid").value.trim().toLowerCase();
+      const cName = document.getElementById("form-cname").value.trim();
+      const cDesc = document.getElementById("form-cdesc").value.trim();
+      let cImage = document.getElementById("form-cimage").value.trim();
+
+      // Validation
+      if (!/^[a-z0-9-]+$/.test(cId)) {
+        alert("Category ID must contain only lowercase letters, numbers, and hyphens (no spaces or special chars).");
+        return;
+      }
+
+      // Check duplicates
+      const dupIdx = categories.findIndex(c => c.id === cId);
+      if (isNew && dupIdx !== -1) {
+        alert(`Category ID "${cId}" is already taken by another category. Please use a unique ID.`);
+        return;
+      }
+
+      if (!cImage) {
+        if (!isNew && categories[idx].image) {
+          cImage = categories[idx].image;
+        } else {
+          cImage = "placeholder_" + cId; // fallback placeholder
+        }
+      }
+
+      const catObj = {
+        id: cId,
+        name: cName,
+        desc: cDesc,
+        image: cImage
+      };
+
+      if (isNew) {
+        categories.push(catObj);
+      } else {
+        categories[idx] = catObj;
+      }
+
+      saveCategories();
+      catModal.classList.remove("active");
+      renderCategoriesTab();
+      window.GalaxyUtils.showToast("Categories list updated successfully.");
+    });
+
+    // ==========================================
+    // RENDER TAB: ORDERS MANAGEMENT
+    // ==========================================
+    const orderModal = document.getElementById("order-modal");
+    const closeOrderModal = document.getElementById("close-order-modal");
+    const orderUpdateForm = document.getElementById("order-update-form");
+
+    closeOrderModal.addEventListener("click", () => {
+      orderModal.classList.remove("active");
+    });
+
+    function openOrderDetails(index) {
+      let o = orders[index];
+      document.getElementById("form-order-index").value = index;
+
+      document.getElementById("ord-view-id").textContent = o.orderId;
+      document.getElementById("ord-view-date").textContent = o.date;
+      document.getElementById("ord-view-customer").textContent = o.name;
+      document.getElementById("ord-view-phone").textContent = o.phone;
+      document.getElementById("ord-view-address").textContent = o.address;
+      document.getElementById("ord-view-payment").textContent = o.payment === "COD" ? "Cash on Delivery" : "Online Gateway";
+      
+      const badge = document.getElementById("ord-view-paystatus");
+      badge.textContent = o.paymentStatus;
+      badge.className = "payment-badge " + (o.paymentStatus === "Paid" ? "payment-paid" : "payment-pending");
+
+      // Items list table
+      const tbody = document.getElementById("ord-view-items-tbody");
+      tbody.innerHTML = (o.items || []).map(item => `
+        <tr>
+          <td>${item.name}</td>
+          <td>${item.quantity}</td>
+          <td>₹${item.price.toLocaleString()}</td>
+          <td><strong>₹${(item.price * item.quantity).toLocaleString()}</strong></td>
+        </tr>
+      `).join("");
+
+      // Timeline entries
+      const timeline = document.getElementById("ord-view-timeline");
+      timeline.innerHTML = (o.history || []).map(h => `
+        <div class="timeline-item">
+          <div><span class="timeline-status">${h.status}</span> - ${h.note || "Order state updated"}</div>
+          <span class="timeline-date">${h.date}</span>
+        </div>
+      `).join("");
+
+      // Set forms controls
+      document.getElementById("form-order-status").value = o.orderStatus;
+      document.getElementById("form-order-payment").value = o.paymentStatus;
+      document.getElementById("form-order-note").value = "";
+
+      orderModal.classList.add("active");
+    }
+
+    orderUpdateForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const idx = document.getElementById("form-order-index").value;
+      let o = orders[idx];
+
+      let newStatus = document.getElementById("form-order-status").value;
+      let newPay = document.getElementById("form-order-payment").value;
+      let noteVal = document.getElementById("form-order-note").value.trim();
+
+      // Check if status changed
+      let statusChanged = o.orderStatus !== newStatus || o.paymentStatus !== newPay;
+      
+      o.orderStatus = newStatus;
+      o.paymentStatus = newPay;
+
+      if (statusChanged || noteVal) {
+        if (!o.history) o.history = [];
+        o.history.push({
+          status: newStatus,
+          date: new Date().toLocaleString(),
+          note: noteVal || `Order status updated to ${newStatus}. Payment: ${newPay}`
+        });
+      }
+
+      saveOrders();
+      orderModal.classList.remove("active");
+      renderOrdersTab();
+      window.GalaxyUtils.showToast("Order records updated.");
+    });
+
+    function renderOrdersTab() {
+      const tbody = document.getElementById("orders-table-tbody");
+      
+      if (orders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2rem; color:#999;">No customer orders placed.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = orders.map((o, idx) => ({o, idx})).reverse().map(item => `
+        <tr data-index="${item.idx}">
+          <td><strong>${item.o.orderId}</strong></td>
+          <td>${item.o.name}<br><span style="font-size:0.75rem; color:#777;">${item.o.phone}</span></td>
+          <td style="color:#666;">${item.o.date}</td>
+          <td>${item.o.payment}</td>
+          <td><span class="payment-badge ${item.o.paymentStatus === "Paid" ? "payment-paid" : "payment-pending"}">${item.o.paymentStatus}</span></td>
+          <td><strong>₹${item.o.total.toLocaleString()}</strong></td>
+          <td><span class="status-badge status-${item.o.orderStatus.toLowerCase()}">${item.o.orderStatus}</span></td>
+          <td style="text-align:right;">
+            <button class="btn btn-outline btn-sm btn-view-order"><i data-lucide="external-link" style="width:12px;height:12px;margin-right:4px;vertical-align:middle;"></i>Details</button>
+          </td>
+        </tr>
+      `).join(""); // Show newest first
+
+      lucide.createIcons();
+
+      tbody.querySelectorAll(".btn-view-order").forEach(btn => {
+        btn.addEventListener("click", () => {
+          let idx = parseInt(btn.closest("tr").getAttribute("data-index"));
+          openOrderDetails(idx);
+        });
+      });
+    }
+
+    // ==========================================
+    // RENDER TAB: ENQUIRIES
+    // ==========================================
+    document.getElementById("btn-clear-enquiries").addEventListener("click", () => {
+      if (confirm("Are you sure you want to delete all form enquiries logs?")) {
+        enquiries = [];
+        saveEnquiries();
+        renderEnquiriesTab();
+        window.GalaxyUtils.showToast("Enquiry logs cleared.", "info");
+      }
+    });
+
+    function renderEnquiriesTab() {
+      const tbody = document.getElementById("enquiries-table-tbody");
+
+      if (enquiries.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem; color:#999;">No enquiry submission logs.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = enquiries.map(e => `
+        <tr>
+          <td><strong>${e.name}</strong><br><span style="font-size:0.75rem; color:#777;"><i data-lucide="phone" style="width:10px;height:10px;vertical-align:middle;margin-right:2px;"></i>${e.phone}</span></td>
+          <td><a href="mailto:${e.email}" style="text-decoration:underline;">${e.email}</a></td>
+          <td><span style="background-color:#eee; padding:0.15rem 0.4rem; border-radius:4px; font-size:0.75rem;">${getCategoryName(e.interest)}</span></td>
+          <td style="max-width:320px; font-style:italic;">"${e.message}"</td>
+          <td style="color:#777;">${e.date}</td>
+        </tr>
+      `).join("").split("\n").reverse().join("\n"); // Show newest first
+
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // RENDER TAB: MANAGE REVIEWS
+    // ==========================================
+    function renderReviewsTab() {
+      const tbody = document.getElementById("reviews-table-tbody");
+
+      if (reviews.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem; color:#999;">No customer reviews found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = reviews.map((r, idx) => `
+        <tr data-index="${idx}">
+          <td><strong>${r.author}</strong></td>
+          <td><span style="color:#666; font-size:0.8rem;">${r.title}</span></td>
+          <td style="color:#C9A227; font-size:1rem; font-weight:bold;">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</td>
+          <td style="max-width:400px; font-style:italic;">"${r.text}"</td>
+          <td style="text-align:right; padding-right: 1.5rem;">
+            <button class="btn btn-danger btn-sm btn-del-review" style="padding:0.4rem 0.6rem;">
+              <i data-lucide="trash-2" style="width:13px;height:13px;margin-right:3px;vertical-align:middle;"></i> Delete
+            </button>
+          </td>
+        </tr>
+      `).join("");
+
+      // Bind delete button events
+      tbody.querySelectorAll(".btn-del-review").forEach(btn => {
+        btn.addEventListener("click", () => {
+          let idx = parseInt(btn.closest("tr").getAttribute("data-index"));
+          if (confirm(`Are you sure you want to delete the review from "${reviews[idx].author}"?`)) {
+            reviews.splice(idx, 1);
+            saveReviews();
+            renderReviewsTab();
+            window.GalaxyUtils.showToast("Review deleted successfully.", "info");
+          }
+        });
+      });
+
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // RENDER TAB: SETTINGS & WEBSITE CONFIGS
+    // ==========================================
+    function renderSettingsTab() {
+      // 1. Profile fields
+      document.getElementById("set-phone").value = store.phone;
+      document.getElementById("set-email").value = store.email;
+      document.getElementById("set-hours").value = store.hours || "";
+      document.getElementById("set-address").value = store.address;
+      document.getElementById("set-razorpay-key").value = store.razorpayKey || "";
+
+      // 2. Promo Coupons list
+      const couponsTbody = document.getElementById("coupons-table-tbody");
+      couponsTbody.innerHTML = coupons.map((c, idx) => `
+        <tr data-index="${idx}">
+          <td><strong>${c.code}</strong></td>
+          <td>${c.discount}% Discount</td>
+          <td style="text-align:right;"><button class="btn btn-danger btn-sm btn-del-coupon"><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button></td>
+        </tr>
+      `).join("");
+
+      tbodyCouponsEvents(couponsTbody);
+
+      // 3. Category list
+      const catTbody = document.getElementById("settings-categories-table-tbody");
+      catTbody.innerHTML = categories.map((c, idx) => `
+        <tr data-index="${idx}">
+          <td><code>${c.id}</code></td>
+          <td><strong>${c.name}</strong></td>
+          <td style="text-align:right;"><button class="btn btn-danger btn-sm btn-del-cat"><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button></td>
+        </tr>
+      `).join("");
+
+      tbodyCategoriesEvents(catTbody);
+      
+      lucide.createIcons();
+    }
+
+    // Store Config Submit
+    document.getElementById("settings-store-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      store.phone = document.getElementById("set-phone").value.trim();
+      store.email = document.getElementById("set-email").value.trim();
+      store.hours = document.getElementById("set-hours").value.trim();
+      store.address = document.getElementById("set-address").value.trim();
+      store.razorpayKey = document.getElementById("set-razorpay-key").value.trim();
+
+      saveStoreConfig();
+      window.GalaxyUtils.showToast("Store profile saved successfully.");
+    });
+
+    // Add Coupon
+    document.getElementById("settings-coupon-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      let code = document.getElementById("coupon-new-code").value.trim().toUpperCase();
+      let val = parseInt(document.getElementById("coupon-new-val").value);
+
+      if (coupons.some(c => c.code === code)) {
+        window.GalaxyUtils.showToast("Coupon code already active.", "error");
+        return;
+      }
+
+      coupons.push({ code, discount: val });
+      saveCoupons();
+      renderSettingsTab();
+      document.getElementById("settings-coupon-form").reset();
+      window.GalaxyUtils.showToast("Promo Coupon created.");
+    });
+
+    function tbodyCouponsEvents(tbody) {
+      tbody.querySelectorAll(".btn-del-coupon").forEach(btn => {
+        btn.addEventListener("click", () => {
+          let idx = parseInt(btn.closest("tr").getAttribute("data-index"));
+          if (confirm(`Remove promo coupon "${coupons[idx].code}"?`)) {
+            coupons.splice(idx, 1);
+            saveCoupons();
+            renderSettingsTab();
+            window.GalaxyUtils.showToast("Coupon deactivated.", "info");
+          }
+        });
+      });
+    }
+
+    // Add Category
+    document.getElementById("settings-category-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      let id = document.getElementById("cat-new-id").value.trim().toLowerCase().replace(/\s+/g, '-');
+      let name = document.getElementById("cat-new-name").value.trim();
+
+      if (categories.some(c => c.id === id)) {
+        window.GalaxyUtils.showToast("Category ID already exists.", "error");
+        return;
+      }
+
+      categories.push({ id, name });
+      saveCategories();
+      renderSettingsTab();
+      document.getElementById("settings-category-form").reset();
+      window.GalaxyUtils.showToast("Category created successfully.");
+    });
+
+    function tbodyCategoriesEvents(tbody) {
+      tbody.querySelectorAll(".btn-del-cat").forEach(btn => {
+        btn.addEventListener("click", () => {
+          let idx = parseInt(btn.closest("tr").getAttribute("data-index"));
+          let cId = categories[idx].id;
+          
+          // Check if any product is using this category
+          let count = products.filter(p => p.category === cId).length;
+          if (count > 0) {
+            alert(`Cannot delete category "${categories[idx].name}". It is currently assigned to ${count} products. Reassign the products first.`);
+            return;
+          }
+
+          if (confirm(`Are you sure you want to delete category "${categories[idx].name}"?`)) {
+            categories.splice(idx, 1);
+            saveCategories();
+            renderSettingsTab();
+            window.GalaxyUtils.showToast("Category deleted.", "info");
+          }
+        });
+      });
+    }
+
+    // Minimal Global Utils Mock for toast popups inside Admin
+    window.GalaxyUtils = {
+      formatCurrency: function(value) {
+        return "₹" + value.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+      },
+      showToast: function(msg, type = "success") {
+        const toast = document.createElement("div");
+        toast.style.position = "fixed";
+        toast.style.bottom = "20px";
+        toast.style.right = "20px";
+        toast.style.backgroundColor = type === "success" ? "var(--color-secondary)" : (type === "error" ? "var(--color-error)" : "#333");
+        toast.style.color = "#fff";
+        toast.style.padding = "10px 20px";
+        toast.style.border = "1px solid " + (type === "success" ? "var(--color-accent)" : "transparent");
+        toast.style.borderRadius = "var(--border-radius)";
+        toast.style.fontSize = "0.8rem";
+        toast.style.fontWeight = "600";
+        toast.style.boxShadow = "var(--shadow-md)";
+        toast.style.zIndex = "10000";
+        toast.style.letterSpacing = "0.5px";
+        toast.style.opacity = "0";
+        toast.style.transform = "translateY(20px)";
+        toast.style.transition = "all var(--transition-fast)";
+        
+        toast.textContent = msg.toUpperCase();
+        document.body.appendChild(toast);
+        
+        // Trigger show animation
+        setTimeout(() => {
+          toast.style.opacity = "1";
+          toast.style.transform = "translateY(0)";
+        }, 50);
+
+        // Hide and remove
+        setTimeout(() => {
+          toast.style.opacity = "0";
+          toast.style.transform = "translateY(20px)";
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+    };
+  </script>
+</body>
+</html>
