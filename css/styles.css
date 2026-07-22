@@ -7456,3 +7456,10 @@ body:has(#quickview-modal:not(.hidden)) {
 .product-card .card-thumbnails {
   display: none !important;
 }
+/* --- Fix Specs Table Text Hugging Border --- */
+.specs-table td:first-child {
+  padding-left: 18px !important;
+}
+.specs-table td:last-child {
+  padding-right: 18px !important;
+}

@@ -1516,27 +1516,29 @@ class ECommerceApp {
         </div>
         <div class="product-detail-layout">
           <!-- Gallery -->
-          <div class="detail-gallery">
-            <div class="detail-main-img-wrapper" id="detail-main-image-wrapper">
+          <div class="detail-gallery" style="display:flex !important; flex-direction:column !important; align-items:center !important; width:100% !important;">
+            <div class="qv-main-img-wrapper" id="detail-main-image-wrapper" style="width:100% !important; max-width:none !important; margin-bottom:20px !important;">
               ${this.renderProductImageHTML(product, "detail-main-img")}
             </div>
             
             <!-- thumbnails -->
-            <div class="detail-thumbnails">
+            <div class="qv-thumbnail-gallery" style="width:100% !important; margin-bottom:20px !important;">
               ${images.map((img, i) => {
-                if (!img || img.startsWith("default_") || img.startsWith("placeholder")) {
+                const src = (img && !img.startsWith("default_") && !img.startsWith("placeholder"))
+                  ? ((img.startsWith("http") || img.startsWith("data:")) ? img : `/assets/products/${img}`)
+                  : null;
+                
+                if (!src) {
                   return `
-                    <div class="thumb-img-wrapper ${i === 0 ? "active" : ""}" data-index="${i}">
-                      <div class="thumb-img fallback-svg-container">${window.GalaxyUtils.getPremiumFurnitureSVG(product.category, product.name)}</div>
+                    <div class="qv-thumb ${i === 0 ? "active" : ""}" data-index="${i}">
+                      <div class="fallback-svg-container">${window.GalaxyUtils.getPremiumFurnitureSVG(product.category, product.name)}</div>
                     </div>
                   `;
                 }
-                const src = (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:"))
-                  ? img
-                  : `/assets/products/${img}`;
+                
                 return `
-                  <div class="thumb-img-wrapper ${i === 0 ? "active" : ""}" data-index="${i}">
-                    <img src="${src}" alt="${product.name}" class="thumb-img" loading="lazy" onerror="this.outerHTML='<div class=\\'thumb-img fallback-svg-container\\'>'+window.GalaxyUtils.getPremiumFurnitureSVG('${product.category.replace(/'/g, "\\'")}', '${product.name.replace(/'/g, "\\'")}')+'</div>'">
+                  <div class="qv-thumb ${i === 0 ? "active" : ""}" data-index="${i}" data-src="${src}">
+                    <img src="${src}" alt="${product.name}" loading="lazy" onerror="this.outerHTML='<div class=\\'fallback-svg-container\\'>'+window.GalaxyUtils.getPremiumFurnitureSVG('${product.category.replace(/'/g, "\\'")}', '${product.name.replace(/'/g, "\\'")}')+'</div>'">
                   </div>
                 `;
               }).join("")}
@@ -1638,7 +1640,7 @@ class ECommerceApp {
     window.GalaxyUtils.initImageZoom(wrapper, mainImg);
 
     // Thumbnails swap
-    const thumbs = document.querySelectorAll(".thumb-img-wrapper");
+    const thumbs = document.querySelectorAll(".qv-thumb");
     thumbs.forEach(thumb => {
       thumb.addEventListener("click", () => {
         thumbs.forEach(t => t.classList.remove("active"));
