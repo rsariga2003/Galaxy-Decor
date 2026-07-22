@@ -2311,10 +2311,11 @@ class ECommerceApp {
 }
 
 // Initialize application on window load
-window.addEventListener("DOMContentLoaded", async () => {
+window.addEventListener("DOMContentLoaded", () => {
   if (window.GalaxyAPI) {
-    // Attempt to sync real data from backend to localStorage before app boots
-    await window.GalaxyAPI.fetchAllData();
+    // Sync real data from backend to localStorage in the background
+    // DO NOT await this, so the app boots instantly!
+    window.GalaxyAPI.fetchAllData();
   }
   window.GalaxyApp = new ECommerceApp();
 });
