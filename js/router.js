@@ -83,14 +83,16 @@ class Router {
     } else {
       console.warn("Route not found: " + pathWithParam);
       // Redirect to homepage if route not found
-      window.location.hash = "#/";
+      if (pathWithParam !== "/") {
+        this.navigate("/");
+      }
     }
   }
 
   // Resolve matching routes (supports simple parameter placeholders like :id)
   resolve(hashPath) {
-    // Trim # and lead/trail slashes
-    let path = hashPath.replace(/^#/, "");
+    // Trim lead/trail slashes
+    let path = hashPath;
     if (!path.startsWith("/")) path = "/" + path;
     if (path.length > 1 && path.endsWith("/")) path = path.slice(0, -1);
 

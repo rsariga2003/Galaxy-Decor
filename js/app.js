@@ -488,6 +488,9 @@ class ECommerceApp {
       .on("/refund-policy", () => this.renderPolicy("refund"))
       .on("/shipping-policy", () => this.renderPolicy("shipping"))
       .on("/order-success", () => this.renderOrderSuccess());
+      
+    // Manually trigger the router now that routes are registered
+    window.GalaxyRouter.handleRouting();
   }
 
   // --- Modal Quick View Handler ---
