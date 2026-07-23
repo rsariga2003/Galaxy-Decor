@@ -51,13 +51,16 @@ app.use(express.static(path.join(__dirname, '..')));
 // ----------------------------------------------------
 // Admin Authentication & Authorization Middleware
 // ----------------------------------------------------
-const ADMIN_USER = process.env.ADMIN_USERNAME || 'admin';
-const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'galaxy123';
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'gd_sec_token_98471205918237';
+const ADMIN_USER = String(process.env.ADMIN_USERNAME || 'admin').trim();
+const ADMIN_PASS = String(process.env.ADMIN_PASSWORD || 'galaxy123').trim();
+const ADMIN_TOKEN = String(process.env.ADMIN_TOKEN || 'gd_sec_token_98471205918237').trim();
 
 app.post('/api/admin/login', (req, res) => {
   const { username, password } = req.body || {};
-  if (username === ADMIN_USER && password === ADMIN_PASS) {
+  const cleanUser = String(username || '').trim().toLowerCase();
+  const cleanPass = String(password || '').trim();
+
+  if (cleanUser === ADMIN_USER.toLowerCase() && cleanPass === ADMIN_PASS) {
     return res.json({
       success: true,
       token: ADMIN_TOKEN,
@@ -68,7 +71,8 @@ app.post('/api/admin/login', (req, res) => {
 });
 
 function requireAdminAuth(req, res, next) {
-  const tokenHeader = req.headers['x-admin-auth'] || req.headers['authorization'];
+  const rawToken = req.headers['x-admin-auth'] || req.headers['authorization'] || '';
+  const tokenHeader = String(rawToken).trim();
   if (tokenHeader === ADMIN_TOKEN || tokenHeader === `Bearer ${ADMIN_TOKEN}`) {
     return next();
   }

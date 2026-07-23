@@ -1019,7 +1019,7 @@
       <div id="login-error-alert" class="login-error">
         Invalid Admin Username or Password.
       </div>
-      <form id="admin-login-form">
+      <form id="admin-login-form" onsubmit="window.handleAdminLogin(event); return false;">
         <div class="form-group">
           <label for="username">Username</label>
           <input type="text" id="username" class="form-control" placeholder="admin" required autocomplete="username">
@@ -1028,7 +1028,7 @@
           <label for="password">Password</label>
           <input type="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
         </div>
-        <button type="submit" class="btn btn-gold btn-block" style="width:100%; margin-top:1.5rem;">Access Dashboard</button>
+        <button type="button" onclick="window.handleAdminLogin(event)" class="btn btn-gold btn-block" style="width:100%; margin-top:1.5rem;">Access Dashboard</button>
       </form>
 
       <!-- Credentials Hint Box -->
@@ -1815,81 +1815,157 @@
 
     // Check Auth State on Load
     document.addEventListener("DOMContentLoaded", () => {
+      console.log("👉 [ADMIN INIT] DOMContentLoaded event fired.");
       if (sessionStorage.getItem("gd_admin_logged_in") === "true") {
-        showDashboard();
+        console.log("👉 [ADMIN INIT] Existing logged-in session found. Launching dashboard...");
+        window.showDashboard();
+      } else {
+        console.log("👉 [ADMIN INIT] Awaiting user login credentials...");
       }
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     });
 
-    // 2. Auth Actions
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const user = document.getElementById("username").value.trim();
-      const pass = document.getElementById("password").value;
+    // 2. Auth Actions (Global Function for fail-proof inline/event binding)
+    window.handleAdminLogin = async function(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      console.log("👉 [ADMIN LOGIN] Form submit / button click triggered!");
 
-      // Attempt live backend authentication first
-      if (window.GalaxyAPI) {
-        const result = await window.GalaxyAPI.loginAdmin(user, pass);
-        if (result.success) {
-          loginError.style.display = "none";
-          showDashboard();
-          return;
+      const userEl = document.getElementById("username");
+      const passEl = document.getElementById("password");
+      const errorEl = document.getElementById("login-error-alert");
+
+      if (!userEl || !passEl) {
+        console.error("❌ [ADMIN LOGIN] Missing username or password element in DOM!");
+        return false;
+      }
+
+      const user = userEl.value.trim().toLowerCase();
+      const pass = passEl.value.trim();
+
+      console.log("👉 [ADMIN LOGIN] Sanitized credentials -> User:", user, "| Pass length:", pass.length);
+
+      let loginSuccessful = false;
+
+      // Attempt live backend API authentication first
+      if (window.GalaxyAPI && typeof window.GalaxyAPI.loginAdmin === 'function') {
+        try {
+          console.log("👉 [ADMIN LOGIN] Sending authentication request to backend API...");
+          const result = await window.GalaxyAPI.loginAdmin(user, pass);
+          console.log("👉 [ADMIN LOGIN] Backend API authentication response:", result);
+          if (result && result.success) {
+            loginSuccessful = true;
+          }
+        } catch (err) {
+          console.warn("⚠️ [ADMIN LOGIN] Backend login attempt warning:", err);
         }
       }
 
-      // Fallback local verification if offline
-      if (user === "admin" && pass === "galaxy123") {
-        sessionStorage.setItem("gd_admin_token", "gd_sec_token_98471205918237");
+      // Fallback local verification if backend API is unreachable or offline
+      if (!loginSuccessful) {
+        console.log("👉 [ADMIN LOGIN] Checking local fallback credentials...");
+        if (user === "admin" && pass === "galaxy123") {
+          console.log("✅ [ADMIN LOGIN] Local fallback credentials matched!");
+          sessionStorage.setItem("gd_admin_token", "gd_sec_token_98471205918237");
+          sessionStorage.setItem("gd_admin_logged_in", "true");
+          loginSuccessful = true;
+        } else {
+          console.error("❌ [ADMIN LOGIN] Invalid credentials entered:", user);
+        }
+      }
+
+      if (loginSuccessful) {
+        console.log("🚀 [ADMIN LOGIN] Login SUCCESSFUL! Opening Admin Dashboard...");
         sessionStorage.setItem("gd_admin_logged_in", "true");
-        loginError.style.display = "none";
-        showDashboard();
+        if (errorEl) errorEl.style.display = "none";
+        window.showDashboard();
       } else {
-        loginError.style.display = "block";
-        loginError.textContent = "Invalid Admin Username or Password.";
+        console.warn("❌ [ADMIN LOGIN] Rejecting access: Showing error notification.");
+        if (errorEl) {
+          errorEl.style.display = "block";
+          errorEl.textContent = "Invalid Admin Username or Password.";
+        }
+      }
+
+      return false;
+    };
+
+    // Logout Action
+    document.addEventListener("DOMContentLoaded", () => {
+      const logoutBtn = document.getElementById("btn-logout");
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+          console.log("👉 [ADMIN LOGOUT] Logging out admin user...");
+          sessionStorage.removeItem("gd_admin_logged_in");
+          sessionStorage.removeItem("gd_admin_token");
+          const appScreenEl = document.getElementById("admin-dashboard-app");
+          const loginScreenEl = document.getElementById("login-screen");
+          if (appScreenEl) appScreenEl.style.display = "none";
+          if (loginScreenEl) loginScreenEl.style.display = "flex";
+          const lForm = document.getElementById("admin-login-form");
+          if (lForm) lForm.reset();
+        });
       }
     });
 
-    document.getElementById("btn-logout").addEventListener("click", () => {
-      sessionStorage.removeItem("gd_admin_logged_in");
-      sessionStorage.removeItem("gd_admin_token");
-      appScreen.style.display = "none";
-      loginScreen.style.display = "flex";
-      loginForm.reset();
-    });
+    window.showDashboard = async function() {
+      console.log("👉 [SHOW DASHBOARD] Executing showDashboard()...");
+      const loginScreenEl = document.getElementById("login-screen");
+      const appScreenEl = document.getElementById("admin-dashboard-app");
 
-    async function showDashboard() {
-      loginScreen.style.display = "none";
-      appScreen.style.display = "block";
-      
+      if (loginScreenEl) loginScreenEl.style.display = "none";
+      if (appScreenEl) appScreenEl.style.display = "block";
+
       // Sync with real backend before rendering
       if (window.GalaxyAPI) {
-        document.getElementById("btn-logout").innerHTML = `<i data-lucide="loader" class="spin"></i> Syncing...`;
-        await window.GalaxyAPI.fetchAllData();
-        await window.GalaxyAPI.fetchAdminData();
-        
-        // Re-read synced data into state variables
-        products = JSON.parse(localStorage.getItem("gd_products")) || [];
-        categories = JSON.parse(localStorage.getItem("gd_categories")) || [];
-        store = JSON.parse(localStorage.getItem("gd_store")) || {};
-        coupons = JSON.parse(localStorage.getItem("gd_coupons")) || [];
-        orders = JSON.parse(localStorage.getItem("gd_orders")) || [];
-        enquiries = JSON.parse(localStorage.getItem("gd_enquiries")) || [];
-        reviews = JSON.parse(localStorage.getItem("gd_reviews")) || [];
-        
-        document.getElementById("btn-logout").innerHTML = `<i data-lucide="log-out"></i> Logout`;
+        const logoutBtn = document.getElementById("btn-logout");
+        if (logoutBtn) logoutBtn.innerHTML = `<i data-lucide="loader" class="spin"></i> Syncing...`;
+        try {
+          console.log("👉 [SHOW DASHBOARD] Syncing catalog & admin data from backend API...");
+          await window.GalaxyAPI.fetchAllData();
+          await window.GalaxyAPI.fetchAdminData();
+          console.log("✅ [SHOW DASHBOARD] Data sync complete!");
+        } catch (err) {
+          console.warn("⚠️ [SHOW DASHBOARD] Backend sync warning:", err);
+        }
+
+        // Re-read synced data into state variables safely
+        let pProds = null, pCats = null, pStore = null, pCoup = null, pOrds = null, pEnqs = null, pRevs = null;
+        try { pProds = JSON.parse(localStorage.getItem("gd_products")); } catch (e) {}
+        try { pCats = JSON.parse(localStorage.getItem("gd_categories")); } catch (e) {}
+        try { pStore = JSON.parse(localStorage.getItem("gd_store")); } catch (e) {}
+        try { pCoup = JSON.parse(localStorage.getItem("gd_coupons")); } catch (e) {}
+        try { pOrds = JSON.parse(localStorage.getItem("gd_orders")); } catch (e) {}
+        try { pEnqs = JSON.parse(localStorage.getItem("gd_enquiries")); } catch (e) {}
+        try { pRevs = JSON.parse(localStorage.getItem("gd_reviews")); } catch (e) {}
+
+        products = Array.isArray(pProds) ? pProds : (window.GALAXY_DECOR_DB ? window.GALAXY_DECOR_DB.products : []);
+        categories = Array.isArray(pCats) ? pCats : (window.GALAXY_DECOR_DB ? window.GALAXY_DECOR_DB.categories : []);
+        store = (pStore && typeof pStore === 'object' && !pStore.error) ? pStore : (window.GALAXY_DECOR_DB ? window.GALAXY_DECOR_DB.store : {});
+        coupons = Array.isArray(pCoup) ? pCoup : defaultCoupons;
+        orders = Array.isArray(pOrds) ? pOrds : [];
+        enquiries = Array.isArray(pEnqs) ? pEnqs : [];
+        reviews = Array.isArray(pRevs) ? pRevs : (window.GALAXY_DECOR_DB ? window.GALAXY_DECOR_DB.reviews : []);
+
+        if (logoutBtn) logoutBtn.innerHTML = `<i data-lucide="log-out"></i> Logout`;
       }
 
-      initTabNavigation();
-      loadAllStats();
-      renderOverviewTab();
-      renderCategoriesTab();
-      renderProductsTab();
-      renderOrdersTab();
-      renderEnquiriesTab();
-      renderSettingsTab();
-      populateFormDropdowns();
-      lucide.createIcons();
-    }
+      console.log("👉 [SHOW DASHBOARD] Rendering UI tabs and stats...");
+      try {
+        initTabNavigation();
+        loadAllStats();
+        renderOverviewTab();
+        renderCategoriesTab();
+        renderProductsTab();
+        renderOrdersTab();
+        renderEnquiriesTab();
+        renderSettingsTab();
+        populateFormDropdowns();
+        if (window.lucide) lucide.createIcons();
+        console.log("🎉 [SHOW DASHBOARD] Admin Dashboard successfully loaded and displayed!");
+      } catch (renderErr) {
+        console.error("❌ [SHOW DASHBOARD] Error rendering UI tabs:", renderErr);
+      }
+    };
 
     // 3. Tab Navigation Manager
     function initTabNavigation() {
@@ -2108,8 +2184,22 @@
     const filterCat = document.getElementById("product-category-filter");
 
     // Search and filter listeners
-    searchInput.addEventListener("input", renderProductsTab);
-    filterCat.addEventListener("change", renderProductsTab);
+    const globalSearchInput = document.getElementById("admin-global-search-input");
+    if (globalSearchInput) {
+      globalSearchInput.addEventListener("input", () => {
+        const activeTab = document.querySelector(".menu-item.active")?.getAttribute("data-tab") || "overview";
+        if (activeTab === "overview") renderOverviewTab();
+        else if (activeTab === "products") renderProductsTab();
+        else if (activeTab === "categories") renderCategoriesTab();
+        else if (activeTab === "orders") renderOrdersTab();
+        else if (activeTab === "enquiries") renderEnquiriesTab();
+        else if (activeTab === "reviews") renderReviewsTab();
+        else if (activeTab === "settings") renderSettingsTab();
+      });
+    }
+
+    if (searchInput) searchInput.addEventListener("input", renderProductsTab);
+    if (filterCat) filterCat.addEventListener("change", renderProductsTab);
 
     document.getElementById("btn-add-product").addEventListener("click", () => {
       openProductModal();
@@ -2284,25 +2374,6 @@
       applyUploadedImages(e.dataTransfer.files);
     });
 
-    // ── Global Search Bar ───────────────────────────────────────────────────
-    const globalSearchInput = document.getElementById("admin-global-search-input");
-    if (globalSearchInput) {
-      globalSearchInput.addEventListener("input", function() {
-        const q = this.value.trim().toLowerCase();
-        if (!q) return;
-        // Switch to products tab and apply search
-        document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
-        document.querySelectorAll(".admin-tab").forEach(t => t.classList.remove("active"));
-        document.querySelector(".menu-item[data-tab='products']").classList.add("active");
-        document.getElementById("tab-products").classList.add("active");
-        // Push query into product search box
-        const prodSearchBox = document.getElementById("product-search-input");
-        if (prodSearchBox) {
-          prodSearchBox.value = q;
-          prodSearchBox.dispatchEvent(new Event("input"));
-        }
-      });
-    }
 
     // Add / Edit submission
     productForm.addEventListener("submit", (e) => {
@@ -2409,11 +2480,19 @@
 
     function renderProductsTab() {
       const tbody = document.getElementById("products-table-tbody");
-      const query = searchInput.value.toLowerCase().trim();
-      const catFilter = filterCat.value;
+      if (!tbody) return;
+
+      const globalQuery = (document.getElementById("admin-global-search-input")?.value || "").toLowerCase().trim();
+      const localQuery = (searchInput?.value || "").toLowerCase().trim();
+      const query = globalQuery || localQuery;
+      const catFilter = filterCat ? filterCat.value : "all";
 
       let filtered = products.map((p, idx) => ({ p, idx })).filter(item => {
-        let matchQuery = item.p.name.toLowerCase().includes(query) || item.p.shortDesc.toLowerCase().includes(query);
+        let matchQuery = !query || 
+          item.p.name.toLowerCase().includes(query) || 
+          (item.p.shortDesc && item.p.shortDesc.toLowerCase().includes(query)) ||
+          (item.p.id && item.p.id.toLowerCase().includes(query)) ||
+          (item.p.category && item.p.category.toLowerCase().includes(query));
         let matchCat = catFilter === "all" || item.p.category === catFilter;
         return matchQuery && matchCat;
       });
@@ -2511,17 +2590,27 @@
       const tbody = document.getElementById("categories-table-tbody");
       if (!tbody) return;
 
-      if (categories.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem; color:#999;">No design categories found.</td></tr>';
+      const query = (document.getElementById("admin-global-search-input")?.value || "").toLowerCase().trim();
+
+      let filteredCats = categories.map((c, idx) => ({ c, idx })).filter(item => {
+        if (!query) return true;
+        const cName = (item.c.name || '').toLowerCase();
+        const cId = (item.c.id || '').toLowerCase();
+        const cDesc = (item.c.desc || '').toLowerCase();
+        return cName.includes(query) || cId.includes(query) || cDesc.includes(query);
+      });
+
+      if (filteredCats.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem; color:#999;">No matching design categories found.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = categories.map((c, idx) => `
-        <tr data-index="${idx}">
-          <td>${renderCategoryImageHTML(c, "thumb-cell")}</td>
-          <td><strong>${c.name}</strong></td>
-          <td><code>${c.id}</code></td>
-          <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${c.desc || '-'}</td>
+      tbody.innerHTML = filteredCats.map(item => `
+        <tr data-index="${item.idx}">
+          <td>${renderCategoryImageHTML(item.c, "thumb-cell")}</td>
+          <td><strong>${item.c.name}</strong></td>
+          <td><code>${item.c.id}</code></td>
+          <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.c.desc || '-'}</td>
           <td style="text-align:right;">
             <div style="display: flex; gap: 8px; justify-content: flex-end;">
               <button class="btn btn-outline btn-sm btn-edit-cat"><i data-lucide="edit-3" style="width:12px;height:12px;margin-right:4px;vertical-align:middle;"></i>Edit</button>
@@ -2836,13 +2925,33 @@
 
     function renderOrdersTab() {
       const tbody = document.getElementById("orders-table-tbody");
-      
-      if (orders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2rem; color:#999;">No customer orders placed.</td></tr>';
+      if (!tbody) return;
+
+      const query = (document.getElementById("admin-global-search-input")?.value || "").toLowerCase().trim();
+
+      let filteredOrders = orders.map((o, idx) => ({o, idx})).filter(item => {
+        if (!query) return true;
+        const ordId = (item.o.orderId || item.o.id || '').toLowerCase();
+        const ordName = (item.o.name || item.o.customerName || '').toLowerCase();
+        const ordPhone = (item.o.phone || item.o.customerPhone || '').toLowerCase();
+        const ordPay = (item.o.payment || '').toLowerCase();
+        const ordStatus = (item.o.orderStatus || item.o.status || '').toLowerCase();
+        const ordPayStatus = (item.o.paymentStatus || '').toLowerCase();
+
+        return ordId.includes(query) ||
+               ordName.includes(query) ||
+               ordPhone.includes(query) ||
+               ordPay.includes(query) ||
+               ordStatus.includes(query) ||
+               ordPayStatus.includes(query);
+      });
+
+      if (filteredOrders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2rem; color:#999;">No matching customer orders found.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = orders.map((o, idx) => ({o, idx})).reverse().map(item => {
+      tbody.innerHTML = filteredOrders.reverse().map(item => {
         const ordId = item.o.orderId || item.o.id || 'GD-000000';
         const ordName = item.o.name || item.o.customerName || 'Customer';
         const ordPhone = item.o.phone || item.o.customerPhone || '';
@@ -2909,14 +3018,33 @@
 
     function renderEnquiriesTab() {
       const tbody = document.getElementById("enquiries-table-tbody");
+      if (!tbody) return;
 
-      if (enquiries.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:#999;">No enquiry submission logs.</td></tr>';
+      const query = (document.getElementById("admin-global-search-input")?.value || "").toLowerCase().trim();
+
+      let filteredEnquiries = enquiries.map((e, idx) => ({e, idx})).filter(item => {
+        if (!query) return true;
+        const eName = (item.e.name || '').toLowerCase();
+        const eEmail = (item.e.email || '').toLowerCase();
+        const ePhone = (item.e.phone || '').toLowerCase();
+        const eInterest = (item.e.interest || '').toLowerCase();
+        const eMessage = (item.e.message || '').toLowerCase();
+
+        return eName.includes(query) ||
+               eEmail.includes(query) ||
+               ePhone.includes(query) ||
+               eInterest.includes(query) ||
+               eMessage.includes(query);
+      });
+
+      if (filteredEnquiries.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:#999;">No matching enquiry logs found.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = [...enquiries].reverse().map((e, idx) => {
-        const originalIndex = enquiries.length - 1 - idx;
+      tbody.innerHTML = filteredEnquiries.reverse().map(item => {
+        const e = item.e;
+        const originalIndex = item.idx;
         const interestVal = e.interest || 'General';
         const dateVal = e.date || (e.createdAt ? new Date(e.createdAt).toLocaleString() : 'N/A');
         const catName = getCategoryName(interestVal);
@@ -2942,13 +3070,26 @@
     // ==========================================
     function renderReviewsTab() {
       const tbody = document.getElementById("reviews-table-tbody");
+      if (!tbody) return;
 
-      if (reviews.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem; color:#999;">No customer reviews found.</td></tr>';
+      const query = (document.getElementById("admin-global-search-input")?.value || "").toLowerCase().trim();
+
+      let filteredReviews = reviews.map((r, idx) => ({ r, idx })).filter(item => {
+        if (!query) return true;
+        const rAuthor = (item.r.author || '').toLowerCase();
+        const rTitle = (item.r.title || '').toLowerCase();
+        const rText = (item.r.text || '').toLowerCase();
+        return rAuthor.includes(query) || rTitle.includes(query) || rText.includes(query);
+      });
+
+      if (filteredReviews.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem; color:#999;">No matching customer reviews found.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = reviews.map((r, idx) => {
+      tbody.innerHTML = filteredReviews.map(item => {
+        const r = item.r;
+        const idx = item.idx;
         const rAuthor = r.author || 'Anonymous';
         const rTitle = r.title || 'Patron Review';
         const rRating = Math.max(1, Math.min(5, Number(r.rating) || 5));
