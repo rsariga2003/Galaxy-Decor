@@ -300,8 +300,15 @@ class ECommerceApp {
     const closeSearchBtn = document.getElementById("close-search-btn");
     const searchDropdown = document.getElementById("search-dropdown");
 
-    searchToggleBtn.addEventListener("click", () => this.toggleSearchDropdown());
-    closeSearchBtn.addEventListener("click", () => this.closeSearchDropdown());
+    if (searchToggleBtn) searchToggleBtn.addEventListener("click", () => this.toggleSearchDropdown());
+    if (closeSearchBtn) closeSearchBtn.addEventListener("click", () => this.closeSearchDropdown());
+    if (searchDropdown) {
+      searchDropdown.addEventListener("click", (e) => {
+        if (e.target === searchDropdown) {
+          this.closeSearchDropdown();
+        }
+      });
+    }
 
     // Quick View Modal Close
     const closeQuickviewBtn = document.getElementById("close-quickview-btn");
