@@ -226,9 +226,37 @@ app.get('/api/solutions', async (req, res) => {
 // ----------------------------------------------------
 app.get('/api/reviews', async (req, res) => {
   try {
-    const { data, error } = await supabase.from('reviews').select('*');
+    const { data, error } = await supabase.from('reviews').select('*').order('createdAt', { ascending: false });
     if (error) throw error;
     res.json(data || []);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/reviews', async (req, res) => {
+  try {
+    const r = req.body;
+    const reviewRecord = {
+      id: r.id || 'rev_' + Date.now(),
+      author: r.author || 'Anonymous',
+      title: r.title || 'Showroom Experience',
+      rating: Number(r.rating) || 5,
+      text: r.text || ''
+    };
+    const { data, error } = await supabase.from('reviews').insert([reviewRecord]).select();
+    if (error) throw error;
+    res.json(data ? data[0] : reviewRecord);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/reviews/:id', requireAdminAuth, async (req, res) => {
+  try {
+    const { error } = await supabase.from('reviews').delete().eq('id', req.params.id);
+    if (error) throw error;
+    res.json({ message: 'Deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -303,7 +331,12 @@ app.get('/api/enquiries', requireAdminAuth, async (req, res) => {
   try {
     const { data, error } = await supabase.from('enquiries').select('*').order('createdAt', { ascending: false });
     if (error) throw error;
-    res.json(data || []);
+    const enquiries = (data || []).map(row => ({
+      ...row,
+      interest: row.interest || 'General',
+      date: row.createdAt ? new Date(row.createdAt).toLocaleString() : (row.date || new Date().toLocaleString())
+    }));
+    res.json(enquiries);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -313,11 +346,12 @@ app.post('/api/enquiries', async (req, res) => {
   try {
     const e = req.body;
     const enquiryRecord = {
-      id: e.id || 'ENQ' + Date.now(),
-      name: e.name,
-      email: e.email,
-      phone: e.phone,
-      message: e.message,
+      id: e.id || 'ENQ-' + Date.now(),
+      name: e.name || 'Visitor',
+      email: e.email || '',
+      phone: e.phone || '',
+      interest: e.interest || 'General',
+      message: e.message || '',
       status: e.status || 'New'
     };
     const { data, error } = await supabase.from('enquiries').insert([enquiryRecord]).select();

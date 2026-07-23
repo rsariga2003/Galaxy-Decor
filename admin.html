@@ -2087,13 +2087,20 @@
       if (recentEnquiries.length === 0) {
         enquiriesTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">No form enquiries.</td></tr>';
       } else {
-        enquiriesTbody.innerHTML = recentEnquiries.map(e => `
-          <tr>
-            <td><strong>${e.name}</strong><br><span style="font-size:0.75rem;color:#777;">${e.phone}</span></td>
-            <td>${getCategoryName(e.interest)}</td>
-            <td style="color:#777;">${e.date.split(",")[0]}</td>
-          </tr>
-        `).join("");
+        enquiriesTbody.innerHTML = recentEnquiries.map(e => {
+          const interestVal = e.interest || 'General';
+          const dateVal = e.date || (e.createdAt ? new Date(e.createdAt).toLocaleString() : '');
+          const catName = getCategoryName(interestVal);
+          const displayCategory = (catName && catName !== 'undefined') ? catName : (interestVal || 'General');
+          const dateOnly = dateVal ? (dateVal.includes(",") ? dateVal.split(",")[0] : dateVal) : '-';
+          return `
+            <tr>
+              <td><strong>${e.name || 'Visitor'}</strong><br><span style="font-size:0.75rem;color:#777;">${e.phone || ''}</span></td>
+              <td>${displayCategory}</td>
+              <td style="color:#777;">${dateOnly}</td>
+            </tr>
+          `;
+        }).join("");
       }
     }
 
@@ -2916,13 +2923,18 @@
 
       tbody.innerHTML = [...enquiries].reverse().map((e, idx) => {
         const originalIndex = enquiries.length - 1 - idx;
+        const interestVal = e.interest || 'General';
+        const dateVal = e.date || (e.createdAt ? new Date(e.createdAt).toLocaleString() : 'N/A');
+        const catName = getCategoryName(interestVal);
+        const displayCategory = (catName && catName !== 'undefined') ? catName : (interestVal || 'General');
+
         return `
         <tr>
-          <td><strong>${e.name}</strong><br><span style="font-size:0.75rem; color:#777;"><i data-lucide="phone" style="width:10px;height:10px;vertical-align:middle;margin-right:2px;"></i>${e.phone}</span></td>
-          <td><a href="mailto:${e.email}" style="text-decoration:underline;">${e.email}</a></td>
-          <td><span style="background-color:#eee; padding:0.15rem 0.4rem; border-radius:4px; font-size:0.75rem;">${getCategoryName(e.interest)}</span></td>
-          <td style="max-width:320px; font-style:italic;">"${e.message}"</td>
-          <td style="color:#777;">${e.date}</td>
+          <td><strong>${e.name || 'Visitor'}</strong><br><span style="font-size:0.75rem; color:#777;"><i data-lucide="phone" style="width:10px;height:10px;vertical-align:middle;margin-right:2px;"></i>${e.phone || ''}</span></td>
+          <td><a href="mailto:${e.email || ''}" style="text-decoration:underline;">${e.email || '-'}</a></td>
+          <td><span style="background-color:#eee; padding:0.15rem 0.4rem; border-radius:4px; font-size:0.75rem;">${displayCategory}</span></td>
+          <td style="max-width:320px; font-style:italic;">"${e.message || ''}"</td>
+          <td style="color:#777;">${dateVal}</td>
           <td><button class="btn btn-danger btn-sm" onclick="deleteEnquiry(${originalIndex})" title="Delete"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button></td>
         </tr>
         `;
@@ -2942,27 +2954,40 @@
         return;
       }
 
-      tbody.innerHTML = reviews.map((r, idx) => `
+      tbody.innerHTML = reviews.map((r, idx) => {
+        const rAuthor = r.author || 'Anonymous';
+        const rTitle = r.title || 'Patron Review';
+        const rRating = Math.max(1, Math.min(5, Number(r.rating) || 5));
+        const rText = r.text || '';
+        return `
         <tr data-index="${idx}">
-          <td><strong>${r.author}</strong></td>
-          <td><span style="color:#666; font-size:0.8rem;">${r.title}</span></td>
-          <td style="color:#C9A227; font-size:1rem; font-weight:bold;">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</td>
-          <td style="max-width:400px; font-style:italic;">"${r.text}"</td>
+          <td><strong>${rAuthor}</strong></td>
+          <td><span style="color:#666; font-size:0.8rem;">${rTitle}</span></td>
+          <td style="color:#C9A227; font-size:1rem; font-weight:bold;">${"★".repeat(rRating)}${"☆".repeat(5 - rRating)}</td>
+          <td style="max-width:400px; font-style:italic;">"${rText}"</td>
           <td style="text-align:right; padding-right: 1.5rem;">
             <button class="btn btn-danger btn-sm btn-del-review" style="padding:0.4rem 0.6rem;">
               <i data-lucide="trash-2" style="width:13px;height:13px;margin-right:3px;vertical-align:middle;"></i> Delete
             </button>
           </td>
         </tr>
-      `).join("");
+        `;
+      }).join("");
 
       // Bind delete button events
       tbody.querySelectorAll(".btn-del-review").forEach(btn => {
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", async () => {
           let idx = parseInt(btn.closest("tr").getAttribute("data-index"));
-          if (confirm(`Are you sure you want to delete the review from "${reviews[idx].author}"?`)) {
+          let revId = reviews[idx] ? reviews[idx].id : null;
+          if (confirm(`Are you sure you want to delete the review from "${reviews[idx].author || 'Anonymous'}"?`)) {
             reviews.splice(idx, 1);
             saveReviews();
+
+            // Sync deletion to Supabase Cloud Backend
+            if (window.GalaxyAPI && revId) {
+              await window.GalaxyAPI.deleteEntity('reviews', revId);
+            }
+
             renderReviewsTab();
             window.GalaxyUtils.showToast("Review deleted successfully.", "info");
           }
@@ -2977,18 +3002,18 @@
     // ==========================================
     function renderSettingsTab() {
       // 1. Profile fields
-      document.getElementById("set-phone").value = store.phone;
-      document.getElementById("set-email").value = store.email;
+      document.getElementById("set-phone").value = store.phone || "";
+      document.getElementById("set-email").value = store.email || "";
       document.getElementById("set-hours").value = store.hours || "";
-      document.getElementById("set-address").value = store.address;
+      document.getElementById("set-address").value = store.address || "";
       document.getElementById("set-razorpay-key").value = store.razorpayKey || "";
 
       // 2. Promo Coupons list
       const couponsTbody = document.getElementById("coupons-table-tbody");
       couponsTbody.innerHTML = coupons.map((c, idx) => `
         <tr data-index="${idx}">
-          <td><strong>${c.code}</strong></td>
-          <td>${c.discount}% Discount</td>
+          <td><strong>${c.code || 'COUPON'}</strong></td>
+          <td>${c.discount !== undefined ? c.discount : (c.discountValue || 0)}% Discount</td>
           <td style="text-align:right;"><button class="btn btn-danger btn-sm btn-del-coupon"><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button></td>
         </tr>
       `).join("");

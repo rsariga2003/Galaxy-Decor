@@ -88,10 +88,9 @@ class ECommerceApp {
     this.wishlist = JSON.parse(localStorage.getItem("gd_wishlist")) || [];
     
     // Check if synced catalog is loaded, otherwise use fallback data from data.js
-    if (!localStorage.getItem("gd_products")) {
-      localStorage.setItem("gd_products", JSON.stringify(window.GALAXY_DECOR_DB.products));
-    }
-    this.products = JSON.parse(localStorage.getItem("gd_products"));
+    let parsedProducts = null;
+    try { parsedProducts = JSON.parse(localStorage.getItem("gd_products")); } catch (e) {}
+    this.products = Array.isArray(parsedProducts) ? parsedProducts : window.GALAXY_DECOR_DB.products;
 
     // Force upgrade categories using a version flag to clear any old cached/broken category image URLs
     const CAT_VERSION = "v6";
@@ -100,17 +99,15 @@ class ECommerceApp {
       localStorage.setItem("gd_categories_ver", CAT_VERSION);
     }
     
-    // Check if categories are saved in localStorage for admin management
-    if (!localStorage.getItem("gd_categories")) {
-      localStorage.setItem("gd_categories", JSON.stringify(window.GALAXY_DECOR_DB.categories));
-    }
-    this.categories = JSON.parse(localStorage.getItem("gd_categories"));
+    let parsedCategories = null;
+    try { parsedCategories = JSON.parse(localStorage.getItem("gd_categories")); } catch (e) {}
+    this.categories = Array.isArray(parsedCategories) ? parsedCategories : window.GALAXY_DECOR_DB.categories;
 
     this.interiorSolutions = window.GALAXY_DECOR_DB.interiorSolutions;
-    if (!localStorage.getItem("gd_reviews")) {
-      localStorage.setItem("gd_reviews", JSON.stringify(window.GALAXY_DECOR_DB.reviews));
-    }
-    this.reviews = JSON.parse(localStorage.getItem("gd_reviews"));
+
+    let parsedReviews = null;
+    try { parsedReviews = JSON.parse(localStorage.getItem("gd_reviews")); } catch (e) {}
+    this.reviews = Array.isArray(parsedReviews) ? parsedReviews : window.GALAXY_DECOR_DB.reviews;
 
     // Check if settings are saved in localStorage for admin management
     if (!localStorage.getItem("gd_store")) {
@@ -508,10 +505,21 @@ class ECommerceApp {
       const thumbs = imagesArray.slice(0, 3);
       qvThumbnailsHTML = `<div class="qv-thumbnail-gallery">
         ${thumbs.map((imgStr, idx) => {
-          const resolvedSrc = (imgStr.startsWith("http") || imgStr.startsWith("data:")) ? imgStr : `/assets/products/${imgStr}`;
+          const resolvedSrc = (imgStr && !imgStr.startsWith("default_") && !imgStr.startsWith("placeholder"))
+            ? ((imgStr.startsWith("http") || imgStr.startsWith("data:")) ? imgStr : `/assets/products/${imgStr}`)
+            : null;
+          
+          if (!resolvedSrc) {
+            return `
+            <div class="qv-thumb ${idx === 0 ? "active" : ""}" data-index="${idx}">
+              <div class="fallback-svg-container">${window.GalaxyUtils.getPremiumFurnitureSVG(product.category, product.name)}</div>
+            </div>
+            `;
+          }
+
           return `
           <div class="qv-thumb ${idx === 0 ? "active" : ""}" data-src="${resolvedSrc}">
-            <img src="${resolvedSrc}" alt="thumb">
+            <img src="${resolvedSrc}" alt="thumb" loading="lazy" onerror="this.outerHTML='<div class=\\'fallback-svg-container\\'>'+window.GalaxyUtils.getPremiumFurnitureSVG('${product.category.replace(/'/g, "\\'")}', '${product.name.replace(/'/g, "\\'")}')+'</div>'">
           </div>
           `;
         }).join("")}
@@ -836,30 +844,39 @@ class ECommerceApp {
             <p class="section-desc">Get a cohesive designer look with our complete residential and commercial furniture packs.</p>
           </div>
           <div class="solutions-grid">
-            ${this.interiorSolutions.slice(0, 3).map(s => `
+            ${(Array.isArray(this.interiorSolutions) ? this.interiorSolutions : []).slice(0, 3).map(s => {
+              const sTitle = s.title || 'Interior Package';
+              const sSub = s.subtitle || 'Custom Design';
+              const sPrice = s.price || 'Contact for Quote';
+              const sDesc = s.desc || '';
+              const sImg = s.image || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80';
+              const sFeatures = Array.isArray(s.features) ? s.features : [];
+
+              return `
               <div class="solution-card">
                 <div class="solution-img-wrapper">
                   <img
-                    src="${s.image}"
-                    alt="${s.title}"
+                    src="${sImg}"
+                    alt="${sTitle}"
                     class="solution-img-photo"
                     loading="lazy"
                     onerror="this.style.display='none'; this.parentElement.style.background='#1a1a1a';"
                   >
                   <div class="solution-img-overlay"></div>
-                  <span class="solution-badge">${s.subtitle}</span>
-                  <div class="solution-price-tag">${s.price}</div>
+                  <span class="solution-badge">${sSub}</span>
+                  <div class="solution-price-tag">${sPrice}</div>
                 </div>
                 <div class="solution-info">
-                  <h3>${s.title}</h3>
-                  <p>${s.desc}</p>
+                  <h3>${sTitle}</h3>
+                  <p>${sDesc}</p>
                   <ul style="font-size:0.8rem; color:var(--color-secondary-muted); margin-bottom:var(--spacing-md); line-height:1.8;">
-                    ${s.features.map(f => `<li><i data-lucide="check" style="width:10px;height:10px;color:var(--color-accent);margin-right:5px;vertical-align:middle;"></i> ${f}</li>`).join("")}
+                    ${sFeatures.map(f => `<li><i data-lucide="check" style="width:10px;height:10px;color:var(--color-accent);margin-right:5px;vertical-align:middle;"></i> ${f}</li>`).join("")}
                   </ul>
                   <button class="btn btn-outline-gold btn-sm" onclick="window.navigateToContact()" type="button">Enquire Details</button>
                 </div>
               </div>
-            `).join("")}
+              `;
+            }).join("")}
           </div>
           <div style="text-align: center; margin-top: var(--spacing-xl);">
             <button class="btn btn-black" onclick="window.navigateToContact()" type="button">Discuss Your Project</button>
@@ -877,21 +894,21 @@ class ECommerceApp {
           <div class="reviews-container">
             <div class="review-slider">
               <div class="review-slides-wrapper" id="review-slides-wrapper">
-                ${this.reviews.map(r => `
+                ${(Array.isArray(this.reviews) && this.reviews.length > 0 ? this.reviews : (window.GALAXY_DECOR_DB ? window.GALAXY_DECOR_DB.reviews : [])).map(r => `
                   <div class="review-slide">
                     <div class="review-quote-icon">“</div>
-                    <p class="review-text">${r.text}</p>
+                    <p class="review-text">${r.text || ''}</p>
                     <div class="review-rating">
-                      ${Array(r.rating).fill('<i data-lucide="star"></i>').join("")}
+                      ${Array(Number(r.rating) || 5).fill('<i data-lucide="star"></i>').join("")}
                     </div>
-                    <div class="review-author">${r.author}</div>
-                    <div class="review-author-title">${r.title}</div>
+                    <div class="review-author">${r.author || 'Anonymous'}</div>
+                    <div class="review-author-title">${r.title || 'Patron'}</div>
                   </div>
                 `).join("")}
               </div>
             </div>
             <div class="review-dots" id="review-dots">
-              ${this.reviews.map((_, i) => `<span class="review-dot ${i === 0 ? "active" : ""}" data-index="${i}"></span>`).join("")}
+              ${(Array.isArray(this.reviews) && this.reviews.length > 0 ? this.reviews : (window.GALAXY_DECOR_DB ? window.GALAXY_DECOR_DB.reviews : [])).map((_, i) => `<span class="review-dot ${i === 0 ? "active" : ""}" data-index="${i}"></span>`).join("")}
             </div>
           </div>
           
@@ -1095,7 +1112,7 @@ class ECommerceApp {
 
     const clientReviewForm = document.getElementById("client-review-form");
     if (clientReviewForm) {
-      clientReviewForm.addEventListener("submit", (e) => {
+      clientReviewForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         
         const author = document.getElementById("rev-author").value.trim();
@@ -1105,24 +1122,27 @@ class ECommerceApp {
         
         const newReview = {
           id: "rev_" + Date.now(),
-          author,
-          title,
-          rating,
-          text
+          author: author || "Anonymous",
+          title: title || "Showroom Experience",
+          rating: rating || 5,
+          text: text || ""
         };
         
-        this.reviews.push(newReview);
+        this.reviews.unshift(newReview);
         localStorage.setItem("gd_reviews", JSON.stringify(this.reviews));
         
-        // Sync to real backend
+        // Sync to Supabase Cloud Backend
         if (window.GalaxyAPI) {
-          window.GalaxyAPI.syncEntity('reviews', 'POST', newReview);
+          await window.GalaxyAPI.syncEntity('reviews', 'POST', newReview);
         }
         
         window.GalaxyUtils.showToast("Review submitted successfully!");
         
-        // Reset and re-render homepage so the new review is instantly visible
         clientReviewForm.reset();
+        if (reviewFormContainer) reviewFormContainer.style.display = "none";
+        if (btnToggleReviewForm) btnToggleReviewForm.textContent = "Write a Review";
+        
+        // Re-render homepage so the new review is instantly visible
         this.renderHome();
       });
     }
@@ -2274,21 +2294,30 @@ class ECommerceApp {
       return;
     }
 
-    const cleanPhone = order.phone.replace(/[^0-9]/g, "");
+    const orderId = order.orderId || order.id || 'GD-000000';
+    const orderName = order.name || order.customerName || 'Valued Customer';
+    const orderPhone = order.phone || order.customerPhone || '';
+    const orderAddress = order.address || order.customerAddress || '';
+    const orderTotal = order.total !== undefined ? Number(order.total) : (Number(order.totalAmount) || 0);
+    const orderPayment = order.payment || (order.paymentStatus === 'Paid' ? 'Online Gateway' : 'COD');
+    const orderPayStatus = order.paymentStatus || 'Pending';
+    const orderDate = order.date || (order.createdAt ? new Date(order.createdAt).toLocaleString() : new Date().toLocaleString());
+
+    const cleanPhone = orderPhone.replace(/[^0-9]/g, "");
     const formattedPhone = cleanPhone.length === 10 ? "91" + cleanPhone : cleanPhone;
     
-    const itemsList = order.items.map(item => `- ${item.name} (x${item.quantity})`).join("%0A");
+    const itemsList = (order.items || []).map(item => `- ${item.name || 'Product'} (x${item.quantity || 1})`).join("%0A");
     const billMessage = `*GALAXY DECOR - ORDER INVOICE*%0A%0A` +
-                        `*Order ID:* ${order.orderId}%0A` +
-                        `*Date:* ${order.date}%0A%0A` +
+                        `*Order ID:* ${orderId}%0A` +
+                        `*Date:* ${orderDate}%0A%0A` +
                         `*Customer Details:*%0A` +
-                        `Name: ${order.name}%0A` +
-                        `Phone: ${order.phone}%0A` +
-                        `Address: ${order.address}%0A%0A` +
+                        `Name: ${orderName}%0A` +
+                        `Phone: ${orderPhone}%0A` +
+                        `Address: ${orderAddress}%0A%0A` +
                         `*Items Ordered:*%0A${itemsList}%0A%0A` +
-                        `*Total Amount:* %E2%82%B9${order.total.toLocaleString()}%0A` +
-                        `*Payment Method:* ${order.payment}%0A` +
-                        `*Payment Status:* ${order.paymentStatus}%0A%0A` +
+                        `*Total Amount:* %E2%82%B9${orderTotal.toLocaleString()}%0A` +
+                        `*Payment Method:* ${orderPayment}%0A` +
+                        `*Payment Status:* ${orderPayStatus}%0A%0A` +
                         `Thank you for shopping with Galaxy Decor!`;
 
     const whatsappUrl = `https://wa.me/${formattedPhone}?text=${billMessage}`;
@@ -2306,23 +2335,23 @@ class ECommerceApp {
           <div class="success-details-box">
             <div class="success-details-row">
               <span>Order Number</span>
-              <strong>${order.orderId}</strong>
+              <strong>${orderId}</strong>
             </div>
             <div class="success-details-row">
               <span>Recipient Name</span>
-              <span>${order.name}</span>
+              <span>${orderName}</span>
             </div>
             <div class="success-details-row">
               <span>Delivery Address</span>
-              <span style="max-width: 60%; text-align:right; font-size:0.75rem;">${order.address}</span>
+              <span style="max-width: 60%; text-align:right; font-size:0.75rem;">${orderAddress}</span>
             </div>
             <div class="success-details-row">
               <span>Payment Type</span>
-              <span>${order.payment === "COD" ? "Cash on Delivery" : "Online Gateway"}</span>
+              <span>${orderPayment === "COD" ? "Cash on Delivery" : "Online Gateway"}</span>
             </div>
             <div class="success-details-row">
               <span>Reserved Total</span>
-              <strong style="color:var(--color-accent); font-size:1.1rem;">${window.GalaxyUtils.formatCurrency(order.total)}</strong>
+              <strong style="color:var(--color-accent); font-size:1.1rem;">${window.GalaxyUtils.formatCurrency(orderTotal)}</strong>
             </div>
           </div>
 

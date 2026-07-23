@@ -30,12 +30,12 @@ window.GalaxyAPI = {
       const store = await storeRes.json();
       const solutions = await solutionsRes.json();
 
-      // Update local storage so it acts as a cache/fallback
-      localStorage.setItem("gd_products", JSON.stringify(products));
-      localStorage.setItem("gd_categories", JSON.stringify(categories));
-      localStorage.setItem("gd_reviews", JSON.stringify(reviews));
-      localStorage.setItem("gd_store", JSON.stringify(store));
-      localStorage.setItem("gd_solutions", JSON.stringify(solutions));
+      // Update local storage so it acts as a cache/fallback only if valid data returned
+      if (Array.isArray(products)) localStorage.setItem("gd_products", JSON.stringify(products));
+      if (Array.isArray(categories)) localStorage.setItem("gd_categories", JSON.stringify(categories));
+      if (Array.isArray(reviews)) localStorage.setItem("gd_reviews", JSON.stringify(reviews));
+      if (store && typeof store === 'object' && !store.error) localStorage.setItem("gd_store", JSON.stringify(store));
+      if (Array.isArray(solutions)) localStorage.setItem("gd_solutions", JSON.stringify(solutions));
 
       console.log("Backend sync successful!");
       return true;
