@@ -3066,8 +3066,14 @@
         return;
       }
 
-      categories.push({ id, name });
+      const newCat = { id, name };
+      categories.push(newCat);
       saveCategories();
+
+      if (window.GalaxyAPI) {
+        window.GalaxyAPI.syncEntity('categories', 'POST', newCat);
+      }
+
       renderSettingsTab();
       document.getElementById("settings-category-form").reset();
       window.GalaxyUtils.showToast("Category created successfully.");
@@ -3089,12 +3095,32 @@
           if (confirm(`Are you sure you want to delete category "${categories[idx].name}"?`)) {
             categories.splice(idx, 1);
             saveCategories();
+
+            if (window.GalaxyAPI) {
+              window.GalaxyAPI.deleteEntity('categories', cId);
+            }
+
             renderSettingsTab();
             window.GalaxyUtils.showToast("Category deleted.", "info");
           }
         });
       });
     }
+
+    // Global ESC key and Backdrop Click to close active modals
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        document.querySelectorAll(".modal.active").forEach(m => m.classList.remove("active"));
+      }
+    });
+
+    document.querySelectorAll(".modal").forEach(modal => {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+          modal.classList.remove("active");
+        }
+      });
+    });
 
     // Minimal Global Utils Mock for toast popups inside Admin
     window.GalaxyUtils = {
