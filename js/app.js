@@ -932,71 +932,85 @@ class ECommerceApp {
       </section>
 
       <!-- Testimonials -->
-      <section class="py-section bg-dark">
+      <section class="py-section bg-dark testimonials-section">
         <div class="container">
-          <div class="section-header">
-            <span class="section-subtitle" style="color:var(--color-accent);">Client Stories</span>
-            <h2 class="section-title">What Our Patrons Say</h2>
+          <div class="section-header text-center">
+            <div class="testimonial-badge-wrapper">
+              <span class="badge-line"></span>
+              <span class="testimonial-pill-badge">Testimonials</span>
+              <span class="badge-line"></span>
+            </div>
+            <h2 class="section-title text-white" style="font-family:var(--font-serif); font-size:2.2rem; font-weight:300; margin-top:0.5rem;">What our clients are saying</h2>
+            <p class="section-desc-light">Our luxury imported furniture & interior solutions are transforming living spaces. Here is what some of our clients have to say about their experience.</p>
           </div>
-          <div class="reviews-container">
-            <div class="review-slider">
-              <div class="review-slides-wrapper" id="review-slides-wrapper">
-                ${(Array.isArray(this.reviews) && this.reviews.length > 0 ? this.reviews : (window.GALAXY_DECOR_DB ? window.GALAXY_DECOR_DB.reviews : [])).map(r => `
-                  <div class="review-slide">
-                    <div class="review-quote-icon">“</div>
-                    <p class="review-text">${r.text || ''}</p>
-                    <div class="review-rating">
-                      ${Array(Number(r.rating) || 5).fill('<i data-lucide="star"></i>').join("")}
+
+          <div class="testimonial-marquee-wrapper">
+            <div class="testimonial-marquee-track">
+              ${(() => {
+                const list = (Array.isArray(this.reviews) && this.reviews.length > 0 ? this.reviews : (window.GALAXY_DECOR_DB ? window.GALAXY_DECOR_DB.reviews : []));
+                const duplicatedList = list.concat(list);
+                return duplicatedList.map(r => `
+                  <div class="testimonial-card">
+                    <div class="testimonial-quote-badge">”</div>
+                    <p class="testimonial-card-text">"${r.text || ''}"</p>
+                    <div class="testimonial-card-footer">
+                      <div class="client-avatar-badge">${(r.author || 'A').charAt(0).toUpperCase()}</div>
+                      <div class="client-details">
+                        <h5 class="client-author-name">${r.author || 'Anonymous'}</h5>
+                        <span class="client-author-title">${r.title || 'Patron'}</span>
+                      </div>
                     </div>
-                    <div class="review-author">${r.author || 'Anonymous'}</div>
-                    <div class="review-author-title">${r.title || 'Patron'}</div>
                   </div>
-                `).join("")}
-              </div>
-            </div>
-            <div class="review-dots" id="review-dots">
-              ${(Array.isArray(this.reviews) && this.reviews.length > 0 ? this.reviews : (window.GALAXY_DECOR_DB ? window.GALAXY_DECOR_DB.reviews : [])).map((_, i) => `<span class="review-dot ${i === 0 ? "active" : ""}" data-index="${i}"></span>`).join("")}
+                `).join("");
+              })()}
             </div>
           </div>
           
-          <div style="text-align: center; margin-top: var(--spacing-xl);">
-            <button id="btn-toggle-review-form" class="btn btn-outline-gold btn-sm">Write a Review</button>
-          </div>
-          
-          <div id="review-form-container" class="review-form-box" style="display: none;">
-            <h3 style="color:#ffffff; font-family:var(--font-serif); font-size:1.4rem; margin-bottom:1.5rem; text-align:center; letter-spacing: 0.02em;">Share Your Experience</h3>
-            <form id="client-review-form">
-              <div class="review-form-grid">
-                <div class="form-group" style="margin-bottom: 0;">
-                  <label for="rev-author" style="color:rgba(255,255,255,0.7); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; display:block; margin-bottom:0.4rem; font-weight: 600;">Your Name</label>
-                  <input type="text" id="rev-author" required placeholder="e.g. Anand Kumar" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; width:100%; border-radius:8px; padding:0.7rem 1.1rem; font-size: 0.85rem;">
-                </div>
-                <div class="form-group" style="margin-bottom: 0;">
-                  <label for="rev-title" style="color:rgba(255,255,255,0.7); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; display:block; margin-bottom:0.4rem; font-weight: 600;">Location / Designation</label>
-                  <input type="text" id="rev-title" required placeholder="e.g. Homeowner" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; width:100%; border-radius:8px; padding:0.7rem 1.1rem; font-size: 0.85rem;">
-                </div>
-              </div>
-              <div class="form-group" style="margin-bottom:1.25rem;">
-                <label for="rev-rating" style="color:rgba(255,255,255,0.7); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; display:block; margin-bottom:0.4rem; font-weight: 600;">Rating</label>
-                <select id="rev-rating" required style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; width:100%; border-radius:8px; padding:0.7rem 1.1rem; cursor:pointer; font-size: 0.85rem;">
-                  <option value="5" style="background:#1e1e1e;">⭐⭐⭐⭐⭐ (5 Stars - Excellent)</option>
-                  <option value="4" style="background:#1e1e1e;">⭐⭐⭐⭐ (4 Stars - Very Good)</option>
-                  <option value="3" style="background:#1e1e1e;">⭐⭐⭐ (3 Stars - Good)</option>
-                  <option value="2" style="background:#1e1e1e;">⭐⭐ (2 Stars - Fair)</option>
-                  <option value="1" style="background:#1e1e1e;">⭐ (1 Star - Poor)</option>
-                </select>
-              </div>
-              <div class="form-group" style="margin-bottom:1.75rem;">
-                <label for="rev-text" style="color:rgba(255,255,255,0.7); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; display:block; margin-bottom:0.4rem; font-weight: 600;">Review Message</label>
-                <textarea id="rev-text" required rows="4" placeholder="Tell us about the product quality, shipping, or showroom experience..." style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; width:100%; border-radius:8px; padding:0.7rem 1.1rem; resize:vertical; font-size: 0.85rem; line-height: 1.5;"></textarea>
-              </div>
-              <div style="text-align:center;">
-                <button type="submit" class="btn btn-gold" style="padding: 0.75rem 2rem; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em;">Submit Review</button>
-              </div>
-            </form>
+          <div class="review-action-wrap">
+            <button id="btn-open-review-modal" class="btn btn-outline-gold btn-sm"><i data-lucide="edit-3" style="width:14px;height:14px;margin-right:6px;"></i> Write a Review</button>
           </div>
         </div>
       </section>
+
+      <!-- Review Form Modal Popup -->
+      <div id="review-modal" class="modal-overlay hidden">
+        <div class="modal-container review-modal-box">
+          <button class="close-modal-btn" id="close-review-modal">&times;</button>
+          <div class="modal-header" style="text-align:center; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <h3 style="color:#ffffff; font-family:var(--font-serif); font-size:1.35rem;">Share Your Experience</h3>
+            <p style="color:rgba(255,255,255,0.6); font-size:0.8rem; margin-top:3px;">Your feedback helps us deliver exceptional interior solutions.</p>
+          </div>
+          <form id="client-review-form">
+            <div class="review-form-grid">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="rev-author" style="color:rgba(255,255,255,0.7); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; display:block; margin-bottom:0.4rem; font-weight: 600;">Your Name</label>
+                <input type="text" id="rev-author" required placeholder="e.g. Anand Kumar" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; width:100%; border-radius:8px; padding:0.7rem 1.1rem; font-size: 0.85rem;">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="rev-title" style="color:rgba(255,255,255,0.7); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; display:block; margin-bottom:0.4rem; font-weight: 600;">Location / Designation</label>
+                <input type="text" id="rev-title" required placeholder="e.g. Homeowner" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; width:100%; border-radius:8px; padding:0.7rem 1.1rem; font-size: 0.85rem;">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:1.25rem;">
+              <label for="rev-rating" style="color:rgba(255,255,255,0.7); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; display:block; margin-bottom:0.4rem; font-weight: 600;">Rating</label>
+              <select id="rev-rating" required style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; width:100%; border-radius:8px; padding:0.7rem 1.1rem; cursor:pointer; font-size: 0.85rem;">
+                <option value="5" style="background:#1e1e1e;">⭐⭐⭐⭐⭐ (5 Stars - Excellent)</option>
+                <option value="4" style="background:#1e1e1e;">⭐⭐⭐⭐ (4 Stars - Very Good)</option>
+                <option value="3" style="background:#1e1e1e;">⭐⭐⭐ (3 Stars - Good)</option>
+                <option value="2" style="background:#1e1e1e;">⭐⭐ (2 Stars - Fair)</option>
+                <option value="1" style="background:#1e1e1e;">⭐ (1 Star - Poor)</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:1.5rem;">
+              <label for="rev-text" style="color:rgba(255,255,255,0.7); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; display:block; margin-bottom:0.4rem; font-weight: 600;">Review Message</label>
+              <textarea id="rev-text" required rows="4" placeholder="Tell us about the product quality, shipping, or showroom experience..." style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; width:100%; border-radius:8px; padding:0.7rem 1.1rem; resize:vertical; font-size: 0.85rem; line-height: 1.5;"></textarea>
+            </div>
+            <div style="text-align:center;">
+              <button type="submit" class="btn btn-gold btn-block" style="padding: 0.75rem 2rem; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em;">Submit Review</button>
+            </div>
+          </form>
+        </div>
+      </div>
 
       <!-- Quick Contact form -->
       <section class="py-section">
@@ -1143,16 +1157,31 @@ class ECommerceApp {
       });
     }
 
-    // Review form toggle and submit event handling
-    const btnToggleReviewForm = document.getElementById("btn-toggle-review-form");
-    const reviewFormContainer = document.getElementById("review-form-container");
-    if (btnToggleReviewForm && reviewFormContainer) {
-      btnToggleReviewForm.addEventListener("click", () => {
-        const isCollapsed = reviewFormContainer.style.display === "none";
-        reviewFormContainer.style.display = isCollapsed ? "block" : "none";
-        btnToggleReviewForm.textContent = isCollapsed ? "Cancel Review" : "Write a Review";
-        if (isCollapsed) {
-          reviewFormContainer.scrollIntoView({ behavior: "smooth", block: "center" });
+    // Review Form Modal Popup Event Handling
+    const btnOpenReviewModal = document.getElementById("btn-open-review-modal");
+    const reviewModal = document.getElementById("review-modal");
+    const btnCloseReviewModal = document.getElementById("close-review-modal");
+
+    if (btnOpenReviewModal && reviewModal) {
+      btnOpenReviewModal.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        reviewModal.classList.remove("hidden");
+      });
+    }
+
+    if (btnCloseReviewModal && reviewModal) {
+      btnCloseReviewModal.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        reviewModal.classList.add("hidden");
+      });
+    }
+
+    if (reviewModal) {
+      reviewModal.addEventListener("click", (e) => {
+        if (e.target.classList.contains("modal-overlay")) {
+          reviewModal.classList.add("hidden");
         }
       });
     }
@@ -1186,8 +1215,7 @@ class ECommerceApp {
         window.GalaxyUtils.showToast("Review submitted successfully!");
         
         clientReviewForm.reset();
-        if (reviewFormContainer) reviewFormContainer.style.display = "none";
-        if (btnToggleReviewForm) btnToggleReviewForm.textContent = "Write a Review";
+        if (reviewModal) reviewModal.classList.add("hidden");
         
         // Re-render homepage so the new review is instantly visible
         this.renderHome();
@@ -1195,35 +1223,7 @@ class ECommerceApp {
     }
   }
 
-  // Testimonials automatic slider logic
-  initReviewSlider() {
-    if (this.reviewInterval) clearInterval(this.reviewInterval);
-    const wrapper = document.getElementById("review-slides-wrapper");
-    const dots = document.querySelectorAll(".review-dot");
-    if (!wrapper || dots.length === 0) return;
-
-    const slideTo = (index) => {
-      this.currentReviewIndex = index;
-      wrapper.style.transform = `translateX(-${index * 100}%)`;
-      
-      dots.forEach((dot, i) => {
-        dot.classList.toggle("active", i === index);
-      });
-    };
-
-    dots.forEach(dot => {
-      dot.addEventListener("click", () => {
-        let index = parseInt(dot.getAttribute("data-index"));
-        slideTo(index);
-      });
-    });
-
-    // Auto rotate every 5 seconds
-    this.reviewInterval = setInterval(() => {
-      let nextIndex = (this.currentReviewIndex + 1) % this.reviews.length;
-      slideTo(nextIndex);
-    }, 5000);
-  }
+  initReviewSlider() {}
 
   // Hero slideshow logic
   initHeroSlider() {

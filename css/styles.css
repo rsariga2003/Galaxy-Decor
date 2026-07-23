@@ -4174,59 +4174,59 @@ textarea:focus {
   transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
-/* Home page transparent overlay mode: header sits transparently over the dark hero banner initially */
-body.home-page .main-header {
-  position: absolute !important;
-  top: var(--announcement-height) !important;
-  left: 0 !important;
-  width: 100% !important;
-  background-color: transparent !important;
+/* Solid Professional White Navbar across all pages */
+.main-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10000 !important;
+  background-color: #ffffff !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  border-bottom: 1px solid transparent !important;
-  box-shadow: none !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
 }
 
-/* Home page scrolled state: header locks to top and turns into white glassmorphism */
+/* Sticky/Fixed Navbar while scrolling: permanently locked to top of screen */
+.main-header.scrolled,
 body.home-page .main-header.scrolled {
   position: fixed !important;
   top: 0 !important;
-  background-color: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04) !important;
-}
-
-/* Transparent Header Mode Nav Links (only applied on home page when unscrolled) */
-body.home-page .main-header:not(.scrolled) .nav-link {
-  color: rgba(255, 255, 255, 0.85) !important;
-}
-body.home-page .main-header:not(.scrolled) .nav-link:hover,
-body.home-page .main-header:not(.scrolled) .nav-link.active {
-  color: #ffffff !important;
-}
-body.home-page .main-header:not(.scrolled) .nav-link::after {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  z-index: 10000 !important;
   background-color: #ffffff !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
 }
 
-/* Brand Text details on transparent header */
-body.home-page .main-header:not(.scrolled) .logo-vector-text .brand-title {
-  color: #ffffff !important;
-}
-body.home-page .main-header:not(.scrolled) .logo-vector-text .brand-subtitle {
-  color: rgba(255, 255, 255, 0.7) !important;
+.main-header .nav-link,
+body.home-page .main-header .nav-link {
+  color: var(--color-secondary-light) !important;
 }
 
-/* Header utility buttons on transparent header */
-body.home-page .main-header:not(.scrolled) .header-btn {
-  color: rgba(255, 255, 255, 0.85) !important;
+.main-header .nav-link:hover,
+.main-header .nav-link.active,
+body.home-page .main-header .nav-link:hover,
+body.home-page .main-header .nav-link.active {
+  color: var(--color-accent) !important;
 }
-body.home-page .main-header:not(.scrolled) .header-btn:hover {
-  color: #ffffff !important;
+
+.main-header .logo-vector-text .brand-title,
+body.home-page .main-header .logo-vector-text .brand-title {
+  color: var(--color-secondary) !important;
 }
-body.home-page .main-header:not(.scrolled) .mobile-menu-toggle {
-  color: #ffffff !important;
+
+.main-header .logo-vector-text .brand-subtitle,
+body.home-page .main-header .logo-vector-text .brand-subtitle {
+  color: var(--color-accent) !important;
+}
+
+.main-header .header-btn,
+.main-header .mobile-menu-toggle,
+body.home-page .main-header .header-btn,
+body.home-page .main-header .mobile-menu-toggle {
+  color: var(--color-secondary-soft) !important;
 }
 
 /* --- 2. Luxury Gold Buttons with Hover Glow --- */
@@ -7792,5 +7792,249 @@ body:has(#quickview-modal:not(.hidden)) {
   }
   .filter-collapse-chevron {
     display: none !important;
+  }
+}
+
+/* --- Reference Image 2 Style Testimonials Section & Popup Modal --- */
+.testimonials-section {
+  padding: 4rem 0 !important;
+  background-color: #09090b !important;
+}
+
+.testimonial-badge-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 0.75rem;
+}
+
+.testimonial-badge-wrapper .badge-line {
+  width: 36px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.testimonial-pill-badge {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.section-desc-light {
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 620px;
+  margin: 0.6rem auto 2.25rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Continuous Single-Line Infinite Marquee Track */
+.testimonial-marquee-wrapper {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 2rem;
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  padding: 0.5rem 0 1rem;
+}
+
+.testimonial-marquee-track {
+  display: flex;
+  gap: 1.5rem;
+  width: max-content;
+  animation: testimonialMarquee 35s linear infinite;
+}
+
+.testimonial-marquee-wrapper:hover .testimonial-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes testimonialMarquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.testimonial-card {
+  width: 360px;
+  flex: 0 0 360px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(201, 162, 39, 0.5);
+  box-shadow: 0 12px 30px rgba(201, 162, 39, 0.15);
+}
+
+/* Galaxy Decor Luxury Gold Color Palette for Quote Badge */
+.testimonial-quote-badge {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #D4AF37 0%, #AA7C11 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-family: var(--font-serif);
+  line-height: 1;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(201, 162, 39, 0.35);
+}
+
+.testimonial-card-text {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+  flex-grow: 1;
+}
+
+.testimonial-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.client-avatar-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(201, 162, 39, 0.15);
+  border: 1px solid rgba(201, 162, 39, 0.6);
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.client-author-name {
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-bottom: 1px;
+}
+
+.client-author-title {
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 0.75rem;
+  display: block;
+}
+
+.review-action-wrap {
+  text-align: center;
+}
+
+/* Review Modal Popup Container & Dark Form Controls */
+.review-modal-box {
+  background: #18181b !important;
+  border: 1px solid rgba(201, 162, 39, 0.35) !important;
+  border-radius: 20px !important;
+  padding: 2.2rem 2rem 2rem !important;
+  max-width: 520px !important;
+  width: 92% !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
+  position: relative !important;
+  transform: none !important;
+}
+
+/* Explicit Dark Theme Input Controls for Review Modal */
+.review-modal-box input,
+.review-modal-box select,
+.review-modal-box textarea {
+  background-color: rgba(255, 255, 255, 0.07) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  padding: 0.7rem 1rem !important;
+  font-size: 0.85rem !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.review-modal-box input:focus,
+.review-modal-box select:focus,
+.review-modal-box textarea:focus {
+  border-color: var(--color-accent) !important;
+  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.25) !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.review-modal-box input::placeholder,
+.review-modal-box textarea::placeholder {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.review-modal-box select option {
+  background-color: #18181b !important;
+  color: #ffffff !important;
+}
+
+/* Close Button Fixed Sizing & Anti-Vibration */
+.review-modal-box .close-modal-btn,
+#close-review-modal {
+  position: absolute !important;
+  top: 14px !important;
+  right: 14px !important;
+  z-index: 999999 !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-radius: 50% !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 1.25rem !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  border: none !important;
+  margin: 0 !important;
+  transform: none !important;
+  transition: background 0.2s ease, color 0.2s ease !important;
+}
+
+.review-modal-box .close-modal-btn:hover,
+#close-review-modal:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  transform: none !important; /* Prevents transform scale vibration */
+}
+
+@media (max-width: 576px) {
+  .testimonial-card {
+    width: 300px;
+    flex: 0 0 300px;
+    padding: 1.2rem;
+  }
+  .testimonials-section {
+    padding: 2.5rem 0 !important;
   }
 }
