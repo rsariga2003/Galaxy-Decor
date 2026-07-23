@@ -243,7 +243,17 @@ app.get('/api/orders', requireAdminAuth, async (req, res) => {
     if (error) throw error;
     const orders = (data || []).map(row => ({
       ...row,
-      items: typeof row.items === 'string' ? JSON.parse(row.items || '[]') : (row.items || [])
+      orderId: row.id || row.orderId,
+      name: row.customerName || row.name || 'Customer',
+      phone: row.customerPhone || row.phone || '',
+      address: row.customerAddress || row.address || '',
+      total: row.totalAmount !== undefined ? Number(row.totalAmount) : (Number(row.total) || 0),
+      orderStatus: row.status || row.orderStatus || 'New',
+      paymentStatus: row.paymentStatus || 'Pending',
+      payment: row.payment || (row.paymentStatus === 'Paid' ? 'Online Gateway' : 'COD'),
+      date: row.createdAt ? new Date(row.createdAt).toLocaleString() : (row.date || new Date().toLocaleString()),
+      items: typeof row.items === 'string' ? JSON.parse(row.items || '[]') : (row.items || []),
+      history: typeof row.history === 'string' ? JSON.parse(row.history || '[]') : (row.history || [{ status: row.status || 'New', date: row.createdAt ? new Date(row.createdAt).toLocaleString() : new Date().toLocaleString(), note: 'Order placed via website.' }])
     }));
     res.json(orders);
   } catch (err) {
@@ -255,13 +265,13 @@ app.post('/api/orders', async (req, res) => {
   try {
     const o = req.body;
     const orderRecord = {
-      id: o.id || 'ORD' + Date.now(),
-      customerName: o.customerName,
-      customerPhone: o.customerPhone,
-      customerAddress: o.customerAddress,
+      id: o.orderId || o.id || 'GD-' + Math.floor(100000 + Math.random() * 900000),
+      customerName: o.name || o.customerName || 'Customer',
+      customerPhone: o.phone || o.customerPhone || '',
+      customerAddress: o.address || o.customerAddress || '',
       items: o.items || [],
-      totalAmount: o.totalAmount,
-      status: o.status || 'Pending',
+      totalAmount: o.total !== undefined ? Number(o.total) : (Number(o.totalAmount) || 0),
+      status: o.orderStatus || o.status || 'New',
       paymentStatus: o.paymentStatus || 'Pending'
     };
     const { data, error } = await supabase.from('orders').insert([orderRecord]).select();

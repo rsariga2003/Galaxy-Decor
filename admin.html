@@ -2682,25 +2682,25 @@
       let o = orders[index];
       document.getElementById("form-order-index").value = index;
 
-      document.getElementById("ord-view-id").textContent = o.orderId;
-      document.getElementById("ord-view-date").textContent = o.date;
-      document.getElementById("ord-view-customer").textContent = o.name;
-      document.getElementById("ord-view-phone").textContent = o.phone;
-      document.getElementById("ord-view-address").textContent = o.address;
-      document.getElementById("ord-view-payment").textContent = o.payment === "COD" ? "Cash on Delivery" : "Online Gateway";
+      document.getElementById("ord-view-id").textContent = o.orderId || o.id || 'GD-000000';
+      document.getElementById("ord-view-date").textContent = o.date || (o.createdAt ? new Date(o.createdAt).toLocaleString() : '');
+      document.getElementById("ord-view-customer").textContent = o.name || o.customerName || 'Customer';
+      document.getElementById("ord-view-phone").textContent = o.phone || o.customerPhone || '';
+      document.getElementById("ord-view-address").textContent = o.address || o.customerAddress || '';
+      document.getElementById("ord-view-payment").textContent = (o.payment === "COD" || (!o.payment && o.paymentStatus !== "Paid")) ? "Cash on Delivery" : "Online Gateway";
       
       const badge = document.getElementById("ord-view-paystatus");
-      badge.textContent = o.paymentStatus;
+      badge.textContent = o.paymentStatus || 'Pending';
       badge.className = "payment-badge " + (o.paymentStatus === "Paid" ? "payment-paid" : "payment-pending");
 
       // Items list table
       const tbody = document.getElementById("ord-view-items-tbody");
       tbody.innerHTML = (o.items || []).map(item => `
         <tr>
-          <td>${item.name}</td>
-          <td>${item.quantity}</td>
-          <td>₹${item.price.toLocaleString()}</td>
-          <td><strong>₹${(item.price * item.quantity).toLocaleString()}</strong></td>
+          <td>${item.name || 'Item'}</td>
+          <td>${item.quantity || 1}</td>
+          <td>₹${Number(item.price || 0).toLocaleString()}</td>
+          <td><strong>₹${(Number(item.price || 0) * (item.quantity || 1)).toLocaleString()}</strong></td>
         </tr>
       `).join("");
 
@@ -2708,14 +2708,14 @@
       const timeline = document.getElementById("ord-view-timeline");
       timeline.innerHTML = (o.history || []).map(h => `
         <div class="timeline-item">
-          <div><span class="timeline-status">${h.status}</span> - ${h.note || "Order state updated"}</div>
-          <span class="timeline-date">${h.date}</span>
+          <div><span class="timeline-status">${h.status || 'Updated'}</span> - ${h.note || "Order state updated"}</div>
+          <span class="timeline-date">${h.date || ''}</span>
         </div>
       `).join("");
 
       // Set forms controls
-      document.getElementById("form-order-status").value = o.orderStatus;
-      document.getElementById("form-order-payment").value = o.paymentStatus;
+      document.getElementById("form-order-status").value = o.orderStatus || o.status || 'New';
+      document.getElementById("form-order-payment").value = o.paymentStatus || 'Pending';
       document.getElementById("form-order-note").value = "";
 
       orderModal.classList.add("active");
@@ -2759,20 +2759,31 @@
         return;
       }
 
-      tbody.innerHTML = orders.map((o, idx) => ({o, idx})).reverse().map(item => `
+      tbody.innerHTML = orders.map((o, idx) => ({o, idx})).reverse().map(item => {
+        const ordId = item.o.orderId || item.o.id || 'GD-000000';
+        const ordName = item.o.name || item.o.customerName || 'Customer';
+        const ordPhone = item.o.phone || item.o.customerPhone || '';
+        const ordDate = item.o.date || (item.o.createdAt ? new Date(item.o.createdAt).toLocaleString() : '');
+        const ordPay = item.o.payment || (item.o.paymentStatus === 'Paid' ? 'Online Gateway' : 'COD');
+        const ordPayStatus = item.o.paymentStatus || 'Pending';
+        const ordTotal = item.o.total !== undefined ? item.o.total : (item.o.totalAmount || 0);
+        const ordStatus = item.o.orderStatus || item.o.status || 'New';
+
+        return `
         <tr data-index="${item.idx}">
-          <td><strong>${item.o.orderId}</strong></td>
-          <td>${item.o.name}<br><span style="font-size:0.75rem; color:#777;">${item.o.phone}</span></td>
-          <td style="color:#666;">${item.o.date}</td>
-          <td>${item.o.payment}</td>
-          <td><span class="payment-badge ${item.o.paymentStatus === "Paid" ? "payment-paid" : "payment-pending"}">${item.o.paymentStatus}</span></td>
-          <td><strong>₹${item.o.total.toLocaleString()}</strong></td>
-          <td><span class="status-badge status-${item.o.orderStatus.toLowerCase()}">${item.o.orderStatus}</span></td>
+          <td><strong>${ordId}</strong></td>
+          <td>${ordName}<br><span style="font-size:0.75rem; color:#777;">${ordPhone}</span></td>
+          <td style="color:#666;">${ordDate}</td>
+          <td>${ordPay}</td>
+          <td><span class="payment-badge ${ordPayStatus === "Paid" ? "payment-paid" : "payment-pending"}">${ordPayStatus}</span></td>
+          <td><strong>₹${Number(ordTotal).toLocaleString()}</strong></td>
+          <td><span class="status-badge status-${ordStatus.toLowerCase()}">${ordStatus}</span></td>
           <td style="text-align:right;">
             <button class="btn btn-outline btn-sm btn-view-order"><i data-lucide="external-link" style="width:12px;height:12px;margin-right:4px;vertical-align:middle;"></i>Details</button>
           </td>
         </tr>
-      `).join(""); // Show newest first
+        `;
+      }).join("");
 
       lucide.createIcons();
 
