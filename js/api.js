@@ -3,7 +3,7 @@
  * Safely fetches data from the backend and falls back to LocalStorage if offline.
  */
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = window.location.origin.includes('localhost') ? 'http://localhost:5000/api' : '/api';
 
 window.GalaxyAPI = {
   
@@ -45,12 +45,38 @@ window.GalaxyAPI = {
     }
   },
 
+  async loginAdmin(username, password) {
+    try {
+      const response = await fetch(`${API_BASE}/admin/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Authentication failed');
+      }
+      const data = await response.json();
+      if (data.token) {
+        sessionStorage.setItem('gd_admin_token', data.token);
+        sessionStorage.setItem('gd_admin_logged_in', 'true');
+        return { success: true };
+      }
+      return { success: false, error: 'No token returned' };
+    } catch (err) {
+      console.warn("Admin login error:", err.message);
+      return { success: false, error: err.message };
+    }
+  },
+
   async fetchAdminData() {
     try {
+      const token = sessionStorage.getItem('gd_admin_token') || '';
+      const authHeaders = { 'X-Admin-Auth': token };
       const [ordersRes, enquiriesRes, couponsRes] = await Promise.all([
-        fetch(`${API_BASE}/orders`),
-        fetch(`${API_BASE}/enquiries`),
-        fetch(`${API_BASE}/coupons`)
+        fetch(`${API_BASE}/orders`, { headers: authHeaders }),
+        fetch(`${API_BASE}/enquiries`, { headers: authHeaders }),
+        fetch(`${API_BASE}/coupons`, { headers: authHeaders })
       ]);
 
       const orders = await ordersRes.json();
@@ -74,9 +100,13 @@ window.GalaxyAPI = {
 
   async syncEntity(endpoint, method, data) {
     try {
+      const token = sessionStorage.getItem('gd_admin_token') || '';
       const response = await fetch(`${API_BASE}/${endpoint}`, {
         method: method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Admin-Auth': token
+        },
         body: JSON.stringify(data)
       });
       if (!response.ok) throw new Error(`Failed to ${method} ${endpoint}`);
@@ -90,8 +120,10 @@ window.GalaxyAPI = {
 
   async deleteEntity(endpoint, id) {
     try {
+      const token = sessionStorage.getItem('gd_admin_token') || '';
       const response = await fetch(`${API_BASE}/${endpoint}/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: { 'X-Admin-Auth': token }
       });
       if (!response.ok) throw new Error(`Failed to delete from ${endpoint}`);
       return await response.json();

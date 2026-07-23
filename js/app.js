@@ -2079,12 +2079,15 @@ class ECommerceApp {
           submitBtn.textContent = "Processing...";
 
           try {
-            // Step 1: Create order on the server
-            const createOrderResponse = await fetch('http://localhost:5000/api/payment/create-order', {
+            const apiBase = window.location.origin.includes('localhost') ? 'http://localhost:5000/api' : '/api';
+            // Step 1: Create order on the server with cart items for server-side validation
+            const createOrderResponse = await fetch(`${apiBase}/payment/create-order`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 amount: orderDetails.total,           // Amount in rupees
+                items: orderDetails.items,            // Cart items array for server price verification
+                couponCode: this.appliedPromo ? this.appliedPromo.code : null, // Active coupon code if any
                 receipt: orderDetails.orderId,        // Our internal order ID as receipt
                 notes: {
                   customer_name: orderDetails.name,
@@ -2112,7 +2115,7 @@ class ECommerceApp {
               "handler": async (response) => {
                 // Step 3: Payment completed on Razorpay — now verify on our server
                 try {
-                  const verifyResponse = await fetch('http://localhost:5000/api/payment/verify', {
+                  const verifyResponse = await fetch(`${apiBase}/payment/verify`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

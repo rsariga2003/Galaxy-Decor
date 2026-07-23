@@ -4,6 +4,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const crypto = require('crypto');
 const Razorpay = require('razorpay');
 const db = require('./database');
@@ -34,8 +35,45 @@ if (razorpayKeyId && razorpayKeySecret && !razorpayKeyId.includes('YOUR_KEY')) {
 app.use(cors());
 app.use(express.json());
 
+// Run catalog sync auto-generator if products_catalog.js is missing
+const catalogScriptPath = path.join(__dirname, '..', 'js', 'products_catalog.js');
+if (!fs.existsSync(catalogScriptPath)) {
+  try {
+    require('../tools/sync_catalog');
+  } catch (e) {
+    console.warn('Auto catalog sync warning:', e.message);
+  }
+}
+
 // Serve static frontend files from workspace root
 app.use(express.static(path.join(__dirname, '..')));
+
+// ----------------------------------------------------
+// Admin Authentication & Authorization Middleware
+// ----------------------------------------------------
+const ADMIN_USER = process.env.ADMIN_USERNAME || 'admin';
+const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'galaxy123';
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'gd_sec_token_98471205918237';
+
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body || {};
+  if (username === ADMIN_USER && password === ADMIN_PASS) {
+    return res.json({
+      success: true,
+      token: ADMIN_TOKEN,
+      message: 'Admin authenticated successfully'
+    });
+  }
+  return res.status(401).json({ error: 'Invalid admin username or password.' });
+});
+
+function requireAdminAuth(req, res, next) {
+  const tokenHeader = req.headers['x-admin-auth'] || req.headers['authorization'];
+  if (tokenHeader === ADMIN_TOKEN || tokenHeader === `Bearer ${ADMIN_TOKEN}`) {
+    return next();
+  }
+  return res.status(401).json({ error: 'Unauthorized: Admin authentication required.' });
+}
 
 // ----------------------------------------------------
 // 1. Store Config API
@@ -59,7 +97,7 @@ app.get('/api/categories', (req, res) => {
   });
 });
 
-app.post('/api/categories', (req, res) => {
+app.post('/api/categories', requireAdminAuth, (req, res) => {
   const { id, name, desc, image } = req.body;
   db.run(`INSERT INTO categories (id, name, desc, image) VALUES (?, ?, ?, ?)`, 
     [id, name, desc, image], function(err) {
@@ -68,7 +106,7 @@ app.post('/api/categories', (req, res) => {
   });
 });
 
-app.delete('/api/categories/:id', (req, res) => {
+app.delete('/api/categories/:id', requireAdminAuth, (req, res) => {
   db.run(`DELETE FROM categories WHERE id = ?`, req.params.id, function(err) {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ message: 'Deleted', changes: this.changes });
@@ -92,7 +130,7 @@ app.get('/api/products', (req, res) => {
   });
 });
 
-app.post('/api/products', (req, res) => {
+app.post('/api/products', requireAdminAuth, (req, res) => {
   const p = req.body;
   const id = p.id || 'p_' + Date.now();
   db.run(`INSERT INTO products (id, name, category, shortDesc, desc, price, offerPrice, image, gallery, isNew, inStock, specs) 
@@ -105,7 +143,7 @@ app.post('/api/products', (req, res) => {
   });
 });
 
-app.put('/api/products/:id', (req, res) => {
+app.put('/api/products/:id', requireAdminAuth, (req, res) => {
   const p = req.body;
   db.run(`UPDATE products SET name=?, category=?, shortDesc=?, desc=?, price=?, offerPrice=?, image=?, gallery=?, isNew=?, inStock=?, specs=? WHERE id=?`,
     [p.name, p.category, p.shortDesc, p.desc, p.price, p.offerPrice, p.image, 
@@ -116,7 +154,7 @@ app.put('/api/products/:id', (req, res) => {
   });
 });
 
-app.delete('/api/products/:id', (req, res) => {
+app.delete('/api/products/:id', requireAdminAuth, (req, res) => {
   db.run(`DELETE FROM products WHERE id = ?`, req.params.id, function(err) {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ message: 'Deleted', changes: this.changes });
@@ -147,7 +185,7 @@ app.get('/api/reviews', (req, res) => {
 // ----------------------------------------------------
 // 6. Orders API
 // ----------------------------------------------------
-app.get('/api/orders', (req, res) => {
+app.get('/api/orders', requireAdminAuth, (req, res) => {
   db.all(`SELECT * FROM orders ORDER BY createdAt DESC`, [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     rows.forEach(row => { row.items = row.items ? JSON.parse(row.items) : []; });
@@ -166,7 +204,7 @@ app.post('/api/orders', (req, res) => {
   });
 });
 
-app.put('/api/orders/:id/status', (req, res) => {
+app.put('/api/orders/:id/status', requireAdminAuth, (req, res) => {
   const { status } = req.body;
   db.run(`UPDATE orders SET status=? WHERE id=?`, [status, req.params.id], function(err) {
     if (err) return res.status(500).json({ error: err.message });
@@ -177,7 +215,7 @@ app.put('/api/orders/:id/status', (req, res) => {
 // ----------------------------------------------------
 // 7. Enquiries API
 // ----------------------------------------------------
-app.get('/api/enquiries', (req, res) => {
+app.get('/api/enquiries', requireAdminAuth, (req, res) => {
   db.all(`SELECT * FROM enquiries ORDER BY createdAt DESC`, [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
@@ -195,7 +233,7 @@ app.post('/api/enquiries', (req, res) => {
   });
 });
 
-app.put('/api/enquiries/:id/status', (req, res) => {
+app.put('/api/enquiries/:id/status', requireAdminAuth, (req, res) => {
   const { status } = req.body;
   db.run(`UPDATE enquiries SET status=? WHERE id=?`, [status, req.params.id], function(err) {
     if (err) return res.status(500).json({ error: err.message });
@@ -206,7 +244,7 @@ app.put('/api/enquiries/:id/status', (req, res) => {
 // ----------------------------------------------------
 // 8. Coupons API
 // ----------------------------------------------------
-app.get('/api/coupons', (req, res) => {
+app.get('/api/coupons', requireAdminAuth, (req, res) => {
   db.all(`SELECT * FROM coupons`, [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     rows.forEach(row => { row.isActive = row.isActive === 1; });
@@ -229,7 +267,7 @@ app.get('/api/payment/key', (req, res) => {
   res.json({ key_id: razorpayKeyId });
 });
 
-// 9b. Create a Razorpay Order (server-side, so amount cannot be tampered)
+// 9b. Create a Razorpay Order (Server-verified prices to prevent client-side amount tampering)
 app.post('/api/payment/create-order', async (req, res) => {
   if (!razorpayInstance) {
     return res.status(503).json({
@@ -237,16 +275,83 @@ app.post('/api/payment/create-order', async (req, res) => {
     });
   }
 
-  const { amount, currency, receipt, notes } = req.body;
+  const { amount, items, couponCode, currency, receipt, notes } = req.body;
 
-  // Validate: amount must be a positive number (in rupees from frontend)
+  // Validate: amount must be a positive number if provided
   if (!amount || typeof amount !== 'number' || amount <= 0) {
     return res.status(400).json({ error: 'Invalid amount. Must be a positive number.' });
   }
 
+  let finalAmount = amount;
+
+  // Security Verification: If items array is provided, calculate exact total server-side
+  if (Array.isArray(items) && items.length > 0) {
+    try {
+      const itemIds = items.map(i => i.id).filter(Boolean);
+      
+      if (itemIds.length > 0) {
+        const placeholders = itemIds.map(() => '?').join(',');
+        const dbProducts = await new Promise((resolve, reject) => {
+          db.all(`SELECT id, price, offerPrice FROM products WHERE id IN (${placeholders})`, itemIds, (err, rows) => {
+            if (err) reject(err);
+            else resolve(rows || []);
+          });
+        });
+
+        const prodMap = {};
+        dbProducts.forEach(p => { prodMap[p.id] = p; });
+
+        let calculatedSubtotal = 0;
+        let totalShipping = 0;
+
+        items.forEach(item => {
+          const qty = parseInt(item.quantity, 10) || 1;
+          const dbProd = prodMap[item.id];
+          const unitPrice = dbProd ? (dbProd.offerPrice > 0 ? dbProd.offerPrice : dbProd.price) : (item.price || 0);
+          calculatedSubtotal += unitPrice * qty;
+          totalShipping += (item.shipping || 0);
+        });
+
+        let promoDiscount = 0;
+        if (couponCode) {
+          const coupon = await new Promise((resolve) => {
+            db.get(`SELECT * FROM coupons WHERE code = ? AND isActive = 1`, [couponCode], (err, row) => {
+              resolve(row || null);
+            });
+          });
+
+          if (coupon && calculatedSubtotal >= (coupon.minOrderValue || 0)) {
+            if (coupon.discountType === 'percentage') {
+              promoDiscount = Math.round((calculatedSubtotal * coupon.discountValue) / 100);
+            } else {
+              promoDiscount = coupon.discountValue;
+            }
+          }
+        }
+
+        const serverCalculatedTotal = Math.max(0, calculatedSubtotal - promoDiscount + totalShipping);
+
+        // Security Enforcement: Compare client-submitted amount with server-calculated total
+        if (Math.abs(amount - serverCalculatedTotal) > 5) {
+          console.warn(`SECURITY ALERT: Payment amount mismatch detected!`);
+          console.warn(`Client submitted: ₹${amount}, Server calculated: ₹${serverCalculatedTotal}`);
+          return res.status(400).json({
+            error: 'Security verification failed: Order total mismatch detected. Please refresh your cart.'
+          });
+        }
+
+        finalAmount = serverCalculatedTotal;
+      }
+    } catch (calcErr) {
+      console.error('Error verifying item prices on backend:', calcErr);
+      // Fail secure if price lookup crashes
+      return res.status(500).json({ error: 'Failed to verify item pricing. Please try again.' });
+    }
+  }
+
   try {
     const orderOptions = {
-      amount: Math.round(amount * 100), // Convert rupees to paise (Razorpay expects paise)
+      amount: Math.round(finalAmount * 100), // Convert rupees to paise (Razorpay expects paise)
       currency: currency || 'INR',
       receipt: receipt || 'order_' + Date.now(),
       notes: notes || {}
@@ -344,10 +449,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`\n======================================`);
-  console.log(`🚀 Galaxy Decor Backend running!`);
-  console.log(`👉 http://localhost:${PORT}`);
-  console.log(`======================================\n`);
-});
+// Start the server if executed directly
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`\n======================================`);
+    console.log(`🚀 Galaxy Decor Backend running!`);
+    console.log(`👉 http://localhost:${PORT}`);
+    console.log(`======================================\n`);
+  });
+}
+
+module.exports = app;

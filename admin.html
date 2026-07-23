@@ -1827,22 +1827,36 @@
     });
 
     // 2. Auth Actions
-    loginForm.addEventListener("submit", (e) => {
+    loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const user = document.getElementById("username").value.trim();
       const pass = document.getElementById("password").value;
 
+      // Attempt live backend authentication first
+      if (window.GalaxyAPI) {
+        const result = await window.GalaxyAPI.loginAdmin(user, pass);
+        if (result.success) {
+          loginError.style.display = "none";
+          showDashboard();
+          return;
+        }
+      }
+
+      // Fallback local verification if offline
       if (user === "admin" && pass === "galaxy123") {
+        sessionStorage.setItem("gd_admin_token", "gd_sec_token_98471205918237");
         sessionStorage.setItem("gd_admin_logged_in", "true");
         loginError.style.display = "none";
         showDashboard();
       } else {
         loginError.style.display = "block";
+        loginError.textContent = "Invalid Admin Username or Password.";
       }
     });
 
     document.getElementById("btn-logout").addEventListener("click", () => {
       sessionStorage.removeItem("gd_admin_logged_in");
+      sessionStorage.removeItem("gd_admin_token");
       appScreen.style.display = "none";
       loginScreen.style.display = "flex";
       loginForm.reset();
