@@ -284,8 +284,11 @@ app.post('/api/orders', async (req, res) => {
 
 app.put('/api/orders/:id/status', requireAdminAuth, async (req, res) => {
   try {
-    const { status } = req.body;
-    const { data, error } = await supabase.from('orders').update({ status }).eq('id', req.params.id).select();
+    const { status, paymentStatus } = req.body;
+    const updateObj = {};
+    if (status) updateObj.status = status;
+    if (paymentStatus) updateObj.paymentStatus = paymentStatus;
+    const { data, error } = await supabase.from('orders').update(updateObj).eq('id', req.params.id).select();
     if (error) throw error;
     res.json({ message: 'Updated', data });
   } catch (err) {
@@ -331,6 +334,16 @@ app.put('/api/enquiries/:id/status', requireAdminAuth, async (req, res) => {
     const { data, error } = await supabase.from('enquiries').update({ status }).eq('id', req.params.id).select();
     if (error) throw error;
     res.json({ message: 'Updated', data });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/enquiries/:id', requireAdminAuth, async (req, res) => {
+  try {
+    const { error } = await supabase.from('enquiries').delete().eq('id', req.params.id);
+    if (error) throw error;
+    res.json({ message: 'Deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

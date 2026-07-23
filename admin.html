@@ -1998,8 +1998,26 @@
       document.getElementById("stat-enquiries-count").textContent = enquiries.length;
 
       let sales = orders
-        .filter(o => o.orderStatus === "Delivered" || o.orderStatus === "New" || o.orderStatus === "Processing" || o.orderStatus === "Shipped")
-        .reduce((sum, o) => sum + o.total, 0);
+        .filter(o => {
+          const ordStatus = (o.orderStatus || o.status || "").toLowerCase();
+          const payStatus = (o.paymentStatus || "").toLowerCase();
+          
+          // Exclude cancelled orders
+          if (ordStatus === "cancelled") return false;
+          
+          // Include if payment is Paid or status is active (New, Processing, Shipped, Delivered, Paid)
+          return payStatus === "paid" || 
+                 ordStatus === "delivered" || 
+                 ordStatus === "new" || 
+                 ordStatus === "processing" || 
+                 ordStatus === "shipped" || 
+                 ordStatus === "paid";
+        })
+        .reduce((sum, o) => {
+          const amt = o.total !== undefined ? Number(o.total) : (Number(o.totalAmount) || 0);
+          return sum + amt;
+        }, 0);
+
       document.getElementById("stat-sales-total").textContent = "₹" + sales.toLocaleString();
     }
 
@@ -2048,14 +2066,20 @@
       if (recentOrders.length === 0) {
         ordersTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999;">No orders reserved.</td></tr>';
       } else {
-        ordersTbody.innerHTML = recentOrders.map(o => `
-          <tr>
-            <td><strong>${o.orderId}</strong></td>
-            <td>${o.name}</td>
-            <td>₹${o.total.toLocaleString()}</td>
-            <td><span class="status-badge status-${o.orderStatus.toLowerCase()}">${o.orderStatus}</span></td>
-          </tr>
-        `).join("");
+        ordersTbody.innerHTML = recentOrders.map(o => {
+          const ordId = o.orderId || o.id || 'GD-000000';
+          const ordName = o.name || o.customerName || 'Customer';
+          const ordTotal = o.total !== undefined ? Number(o.total) : (Number(o.totalAmount) || 0);
+          const ordStatus = o.orderStatus || o.status || 'New';
+          return `
+            <tr>
+              <td><strong>${ordId}</strong></td>
+              <td>${ordName}</td>
+              <td>₹${ordTotal.toLocaleString()}</td>
+              <td><span class="status-badge status-${ordStatus.toLowerCase()}">${ordStatus}</span></td>
+            </tr>
+          `;
+        }).join("");
       }
 
       // 5 Recent enquiries
@@ -2179,7 +2203,48 @@
       }
     }
 
-    function applyUploadedImages(files) {
+    // Lightweight HTML5 Canvas Image Compression Helper
+    // Downscales high-resolution images & compresses to WebP/JPEG to prevent huge Base64 payloads
+    function compressImageFile(file, maxDimension = 800, quality = 0.75) {
+      return new Promise((resolve) => {
+        if (!file || !file.type.startsWith("image/")) {
+          return resolve(null);
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxDimension || height > maxDimension) {
+              if (width > height) {
+                height = Math.round((height * maxDimension) / width);
+                width = maxDimension;
+              } else {
+                width = Math.round((width * maxDimension) / height);
+                height = maxDimension;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const compressedDataUrl = canvas.toDataURL("image/webp", quality) || canvas.toDataURL("image/jpeg", quality);
+            resolve(compressedDataUrl);
+          };
+          img.onerror = () => resolve(e.target.result);
+          img.src = e.target.result;
+        };
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function applyUploadedImages(files) {
       if (!files || files.length === 0) return;
       
       let filesToProcess = Array.from(files).filter(f => f.type.startsWith("image/"));
@@ -2191,19 +2256,15 @@
       
       if (filesToProcess.length === 0) return;
       
-      let processedCount = 0;
-      filesToProcess.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          window.currentFormGallery.push(e.target.result);
-          processedCount++;
-          if (processedCount === filesToProcess.length) {
-            document.getElementById("form-pimage").value = JSON.stringify(window.currentFormGallery);
-            renderProductGallery();
-          }
-        };
-        reader.readAsDataURL(file);
-      });
+      for (const file of filesToProcess) {
+        const compressedBase64 = await compressImageFile(file, 800, 0.75);
+        if (compressedBase64) {
+          window.currentFormGallery.push(compressedBase64);
+        }
+      }
+
+      document.getElementById("form-pimage").value = JSON.stringify(window.currentFormGallery);
+      renderProductGallery();
     }
 
     // File input change
@@ -2541,8 +2602,15 @@
       }
 
       if (confirm(`Are you sure you want to delete the category "${cat.name}"?`)) {
+        const deletedId = cat.id;
         categories.splice(index, 1);
         saveCategories();
+
+        // Sync category deletion to Supabase Cloud Backend
+        if (window.GalaxyAPI) {
+          window.GalaxyAPI.deleteEntity('categories', deletedId);
+        }
+
         renderCategoriesTab();
         window.GalaxyUtils.showToast("Category deleted successfully.", "info");
       }
@@ -2565,22 +2633,20 @@
       clearCategoryFormImage();
     });
 
-    function applyUploadedCategoryImage(file) {
+    async function applyUploadedCategoryImage(file) {
       if (!file || !file.type.startsWith("image/")) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const base64 = e.target.result;
-        document.getElementById("form-cimage").value = base64;
+      const compressedBase64 = await compressImageFile(file, 800, 0.75);
+      if (compressedBase64) {
+        document.getElementById("form-cimage").value = compressedBase64;
         const preview = document.getElementById("cimg-upload-preview");
         const placeholder = document.getElementById("cimg-upload-placeholder");
         const clearActions = document.getElementById("cimg-upload-actions");
 
-        preview.src = base64;
+        preview.src = compressedBase64;
         preview.style.display = "block";
         placeholder.style.display = "none";
         clearActions.style.display = "flex";
-      };
-      reader.readAsDataURL(file);
+      }
     }
 
     document.getElementById("form-cimage-file").addEventListener("change", function() {
@@ -2662,6 +2728,12 @@
       }
 
       saveCategories();
+      
+      // Sync category to Supabase Cloud Backend
+      if (window.GalaxyAPI) {
+        window.GalaxyAPI.syncEntity('categories', 'POST', catObj);
+      }
+
       catModal.classList.remove("active");
       renderCategoriesTab();
       window.GalaxyUtils.showToast("Categories list updated successfully.");
@@ -2746,6 +2818,16 @@
       }
 
       saveOrders();
+
+      // Sync order status update to Supabase Cloud Backend
+      if (window.GalaxyAPI) {
+        const orderId = o.orderId || o.id;
+        window.GalaxyAPI.syncEntity(`orders/${orderId}/status`, 'PUT', {
+          status: newStatus,
+          paymentStatus: newPay
+        });
+      }
+
       orderModal.classList.remove("active");
       renderOrdersTab();
       window.GalaxyUtils.showToast("Order records updated.");
@@ -2808,9 +2890,17 @@
     });
 
     window.deleteEnquiry = function(index) {
+      const enq = enquiries[index];
       if (confirm("Are you sure you want to delete this enquiry?")) {
+        const deletedId = enq ? enq.id : null;
         enquiries.splice(index, 1);
         saveEnquiries();
+
+        // Sync enquiry deletion to Supabase Cloud Backend
+        if (window.GalaxyAPI && deletedId) {
+          window.GalaxyAPI.deleteEntity('enquiries', deletedId);
+        }
+
         renderEnquiriesTab();
         window.GalaxyUtils.showToast("Enquiry deleted successfully.", "success");
       }
