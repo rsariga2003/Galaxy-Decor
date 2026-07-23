@@ -6210,3 +6210,1256 @@ section .btn-black[href="#/contact"] {
     bottom: 15px !important;
   }
 }
+/* ========================================================================= */
+/* --- NEW PREMIUM UI OVERRIDES (AMAZON/MEESHO/IKEA STYLE) --- */
+/* ========================================================================= */
+
+/* --- Product Card (Modern Premium) --- */
+.product-card {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  border: 1px solid #f0f0f0 !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+}
+
+.product-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.08) !important;
+  border-color: #e5e7eb !important;
+}
+
+/* Remove old crazy 3D animation overrides */
+.product-card::before, .product-card::after { display: none !important; }
+
+/* --- Product Images & Zoom --- */
+.product-image-wrapper {
+  position: relative !important;
+  padding-bottom: 0 !important;
+  overflow: hidden !important;
+  background: #f9fafb !important;
+  aspect-ratio: 4/5 !important;
+}
+
+.product-image-wrapper img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  transition: transform 0.5s ease !important;
+}
+
+.product-card:hover .product-image-wrapper img {
+  transform: scale(1.05) !important;
+}
+
+/* --- Thumbnails --- */
+.card-thumbnails {
+  position: absolute !important;
+  bottom: 8px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  display: flex !important;
+  gap: 6px !important;
+  z-index: 2 !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  padding: 4px 6px !important;
+  border-radius: 20px !important;
+  backdrop-filter: blur(4px) !important;
+  opacity: 0 !important;
+  transition: opacity 0.3s ease !important;
+}
+
+.product-card:hover .card-thumbnails {
+  opacity: 1 !important;
+}
+
+.card-thumb {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(0,0,0,0.1) !important;
+  background: #fff !important;
+}
+
+.card-thumb img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* --- Hover Actions (Quick View & Wishlist) --- */
+.product-action-overlay {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  opacity: 0 !important;
+  transition: opacity 0.3s ease !important;
+  z-index: 10 !important;
+}
+
+.product-card:hover .product-action-overlay {
+  opacity: 1 !important;
+}
+
+.btn-qv-circular {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #1a1a1a !important;
+  border: none !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+}
+
+.btn-qv-circular:hover {
+  background: #1a1a1a !important;
+  color: #fff !important;
+  transform: scale(1.1) !important;
+}
+
+.qv-tooltip {
+  position: absolute !important;
+  right: 50px !important;
+  background: #1a1a1a !important;
+  color: #fff !important;
+  font-size: 0.7rem !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.2s ease !important;
+  white-space: nowrap !important;
+}
+
+.btn-qv-circular:hover .qv-tooltip {
+  opacity: 1 !important;
+}
+
+/* Modern Wishlist Icon */
+.wishlist-add-btn {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  z-index: 5 !important;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s ease !important;
+}
+
+.wishlist-add-btn i {
+  color: #9CA3AF !important;
+  transition: color 0.2s ease !important;
+}
+
+.wishlist-add-btn:hover {
+  transform: scale(1.15) !important;
+}
+
+.wishlist-add-btn.wishlisted i {
+  color: #C9A227 !important;
+  fill: #C9A227 !important;
+}
+
+/* --- Badges --- */
+.product-badge-group {
+  position: absolute !important;
+  top: 12px !important;
+  left: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  z-index: 5 !important;
+}
+
+.product-badge {
+  padding: 4px 10px !important;
+  border-radius: 20px !important; /* Pill shape */
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+}
+
+.badge-new {
+  background: #1a1a1a !important;
+  color: #fff !important;
+}
+
+.badge-discount {
+  background: #C9A227 !important;
+  color: #fff !important;
+}
+
+.badge-out-stock {
+  background: #dc3545 !important;
+  color: #fff !important;
+}
+
+/* --- Info & Typography --- */
+.product-card-info {
+  padding: 1rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  flex-grow: 1 !important;
+}
+
+.product-card-cat {
+  font-size: 0.7rem !important;
+  color: #6B7280 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  font-weight: 600 !important;
+}
+
+.product-card-title {
+  margin: 0 !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+}
+
+.product-card-title a {
+  color: #111827 !important;
+  text-decoration: none !important;
+}
+
+.product-card-title a:hover {
+  color: #C9A227 !important;
+}
+
+.product-card-price-row {
+  margin-top: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.price-actual {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+}
+
+.price-original {
+  font-size: 0.8rem !important;
+  color: #9CA3AF !important;
+  text-decoration: line-through !important;
+}
+
+/* --- Footer Buttons --- */
+.product-card-footer {
+  padding: 0 1rem 1rem !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 8px !important;
+  border: none !important;
+}
+
+.product-card-footer .btn {
+  padding: 8px !important;
+  font-size: 0.75rem !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+}
+
+/* --- Filter Sidebar (Sticky Premium Card) --- */
+.filters-sidebar {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  border: 1px solid #f3f4f6 !important;
+  padding: 1.5rem !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04) !important;
+  position: sticky !important;
+  top: 80px !important;
+  max-height: calc(100vh - 100px) !important;
+  overflow-y: auto !important;
+}
+
+.filters-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 1.5rem !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  padding-bottom: 1rem !important;
+}
+
+.filters-title {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+}
+
+.clear-filters-btn {
+  background: none !important;
+  border: none !important;
+  color: #6B7280 !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: color 0.2s ease !important;
+}
+
+.clear-filters-btn:hover {
+  color: #C9A227 !important;
+  text-decoration: underline !important;
+}
+
+.filter-group {
+  margin-bottom: 1.5rem !important;
+}
+
+.filter-group-title {
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
+  margin-bottom: 1rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* --- Custom Circular Checkboxes --- */
+.custom-checkbox {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-bottom: 12px !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  position: relative !important;
+}
+
+.custom-checkbox input {
+  position: absolute !important;
+  opacity: 0 !important;
+  cursor: pointer !important;
+  height: 0 !important;
+  width: 0 !important;
+}
+
+.checkmark {
+  width: 20px !important;
+  height: 20px !important;
+  background-color: #fff !important;
+  border: 2px solid #d1d5db !important;
+  border-radius: 50% !important; /* Circular */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+}
+
+.custom-checkbox:hover input ~ .checkmark {
+  border-color: #C9A227 !important;
+}
+
+.custom-checkbox input:checked ~ .checkmark {
+  background-color: #C9A227 !important;
+  border-color: #C9A227 !important;
+}
+
+/* Create the dot indicator */
+.checkmark:after {
+  content: "" !important;
+  position: absolute !important;
+  display: none !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: white !important;
+}
+
+.custom-checkbox input:checked ~ .checkmark:after {
+  display: block !important;
+}
+
+.checkbox-text {
+  font-size: 0.9rem !important;
+  color: #4b5563 !important;
+  transition: color 0.2s ease !important;
+}
+
+.custom-checkbox input:checked ~ .checkbox-text {
+  font-weight: 600 !important;
+  color: #111827 !important;
+}
+
+/* --- Sort Dropdown --- */
+.catalog-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 1.5rem !important;
+  background: #fff !important;
+  padding: 1rem 1.5rem !important;
+  border-radius: 12px !important;
+  border: 1px solid #f0f0f0 !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02) !important;
+}
+
+.sort-select-wrapper label {
+  font-size: 0.85rem !important;
+  color: #6b7280 !important;
+  margin-right: 8px !important;
+  font-weight: 500 !important;
+}
+
+.sort-select {
+  padding: 8px 16px !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  background-color: #f9fafb !important;
+  font-size: 0.9rem !important;
+  color: #111827 !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  outline: none !important;
+  transition: all 0.2s ease !important;
+  appearance: auto !important; /* Keep default arrow but style box */
+}
+
+.sort-select:hover {
+  border-color: #C9A227 !important;
+}
+
+.sort-select:focus {
+  border-color: #C9A227 !important;
+  box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.2) !important;
+}
+/* --- Quick fix for filter options border and alignment --- */
+.filter-group-title + div, .filter-options {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  animation: none !important;
+}
+
+.custom-checkbox {
+  margin-left: 6px !important; /* Slight padding from the left edge */
+}
+/* --- User Feedback Fixes --- */
+
+/* 1. Remove the huge white background from the hover overlay inherited from old CSS */
+.product-action-overlay {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  width: auto !important;
+  padding: 0 !important;
+  bottom: auto !important;
+}
+
+/* 2. Fix the huge product images by reducing the column size and making it square instead of tall */
+.catalog-layout .products-grid {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+  gap: 1.25rem !important;
+}
+
+/* Make images perfectly square so they don't look overly huge and tall */
+.product-image-wrapper {
+  aspect-ratio: 1/1 !important;
+  padding-bottom: 0 !important;
+}
+/* --- User Layout Fixes for Icons --- */
+
+/* 1. Quick View Bar Overlay */
+.quickview-bar-overlay {
+  position: absolute !important;
+  bottom: -40px !important;
+  left: 0 !important;
+  width: 100% !important;
+  transition: bottom 0.3s ease !important;
+  z-index: 10 !important;
+}
+
+.product-card:hover .quickview-bar-overlay {
+  bottom: 0 !important;
+}
+
+.btn-quickview-bar {
+  width: 100% !important;
+  padding: 10px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: none !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05) !important;
+  transition: background 0.2s ease, color 0.2s ease !important;
+}
+
+.btn-quickview-bar:hover {
+  background: #1a1a1a !important;
+  color: #fff !important;
+}
+
+/* 2. Move thumbnails out of the image overlay to avoid clutter */
+.card-thumbnails {
+  position: static !important;
+  transform: none !important;
+  display: flex !important;
+  gap: 6px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+  opacity: 1 !important;
+  margin-bottom: 8px !important;
+}
+
+.card-thumb {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 4px !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.product-action-overlay {
+  display: none !important; /* Hide old overlay completely */
+}
+/* --- Full Screen Quick View Modal Fix --- */
+#quickview-modal .modal-container {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  border-radius: 0 !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 5% 10% !important;
+  box-shadow: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#quickview-modal .product-detail-layout {
+  max-width: 1200px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+#quickview-modal .close-modal-btn {
+  top: 30px !important;
+  right: 40px !important;
+  background: #f3f4f6 !important;
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 50% !important;
+  z-index: 10020 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+#quickview-modal .close-modal-btn i {
+  width: 24px !important;
+  height: 24px !important;
+  color: #1a1a1a !important;
+}
+
+#quickview-modal .close-modal-btn:hover {
+  background: #1a1a1a !important;
+  color: #fff !important;
+}
+
+#quickview-modal .close-modal-btn:hover i {
+  color: #fff !important;
+}
+/* ========================================================================= */
+/* --- NEW QUICK VIEW MODAL REDESIGN --- */
+/* ========================================================================= */
+
+/* 1. Modal Container Override (Reverting full screen to premium box) */
+#quickview-modal .modal-container {
+  width: 90vw !important;
+  max-width: 900px !important;
+  height: auto !important;
+  max-height: 90vh !important;
+  border-radius: 16px !important;
+  border: none !important;
+  background: #fff !important;
+  margin: auto !important;
+  padding: 2.5rem !important;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.15) !important;
+  display: block !important;
+  overflow-y: auto !important;
+}
+
+#quickview-modal .close-modal-btn {
+  top: 15px !important;
+  right: 15px !important;
+  background: #f9fafb !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+}
+
+#quickview-modal .close-modal-btn:hover {
+  background: #1a1a1a !important;
+  color: #fff !important;
+}
+
+/* 2. Layout */
+#quickview-modal .product-detail-layout {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 2.5rem !important;
+  align-items: start !important;
+}
+
+@media (max-width: 768px) {
+  #quickview-modal .product-detail-layout {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* 3. Main Image */
+.qv-main-img-wrapper {
+  background: #f9fafb !important;
+  border-radius: 12px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  aspect-ratio: 1/1 !important;
+  margin-bottom: 1rem !important;
+}
+.qv-main-img-wrapper img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* 4. Thumbnail Gallery */
+.qv-thumbnail-gallery {
+  display: flex !important;
+  gap: 12px !important;
+  justify-content: center !important;
+}
+
+.qv-thumb {
+  width: 70px !important;
+  height: 70px !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  border: 2px solid transparent !important;
+  cursor: pointer !important;
+  opacity: 0.7 !important;
+  transition: all 0.2s ease !important;
+  background: #f9fafb !important;
+}
+
+.qv-thumb img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.qv-thumb:hover {
+  opacity: 1 !important;
+  border-color: #e5e7eb !important;
+}
+
+.qv-thumb.active {
+  opacity: 1 !important;
+  border-color: #C9A227 !important;
+}
+
+/* 5. Buttons */
+.qv-purchase-options {
+  display: flex !important;
+  gap: 12px !important;
+  margin-bottom: 12px !important;
+}
+
+.btn-qv-action {
+  flex: 1 !important;
+  padding: 12px 20px !important;
+  border-radius: 8px !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-decoration: none !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.btn-qv-action:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+.btn-add-cart-qv {
+  background: #C9A227 !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+.btn-buy-qv {
+  background: #1a1a1a !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+.btn-view-details-qv {
+  border: 1px solid #e5e7eb !important;
+  background: #fff !important;
+  color: #1a1a1a !important;
+  width: 100% !important;
+}
+/* --- Further Modal Spacing and Scrollbar Fixes --- */
+
+/* 1. Expand modal size, remove scrollbar, add more padding */
+#quickview-modal .modal-container {
+  padding: 3.5rem !important;
+  max-width: 1000px !important;
+  max-height: 96vh !important;
+  overflow: visible !important; /* Remove vertical scrollbar */
+}
+
+/* Hide scrollbar just in case it still overflows on tiny screens */
+#quickview-modal .modal-container::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* 2. Increase gap between image and text */
+#quickview-modal .product-detail-layout {
+  gap: 4rem !important;
+  align-items: center !important;
+}
+
+/* 3. Button Spacing - Ensure they don't touch the bottom */
+#quickview-modal .qv-purchase-options {
+  margin-top: 2rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+#quickview-modal .btn-view-details-qv {
+  margin-bottom: 0.5rem !important;
+}
+
+/* 4. Right side text alignment improvements */
+#quickview-modal .detail-title {
+  line-height: 1.3 !important;
+  margin-bottom: 1rem !important;
+}
+
+#quickview-modal .detail-desc {
+  margin-top: 1rem !important;
+  margin-bottom: 2rem !important;
+  line-height: 1.6 !important;
+  color: #4b5563 !important;
+}
+
+/* 5. Main Image spacing */
+.qv-main-img-wrapper {
+  margin-bottom: 1.5rem !important;
+  border-radius: 16px !important;
+}
+/* --- Fix Modal Overlap & Hide Detail Button --- */
+
+/* 1. Remove the old 3D gold border from the inner modal-content container */
+#quickview-modal-content {
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  height: 100% !important;
+  animation: none !important;
+}
+
+/* 2. Hide the View Full Details button as requested */
+#quickview-modal .btn-view-details-qv {
+  display: none !important;
+}
+/* --- Fix Thumbnail Overlap --- */
+#quickview-modal-content {
+  height: auto !important;
+}
+
+#quickview-modal .product-detail-layout {
+  align-items: start !important;
+  height: auto !important;
+}
+
+.qv-main-img-wrapper {
+  margin-bottom: 1.5rem !important;
+}
+
+#quickview-modal .modal-container {
+  overflow: hidden !important; /* Force background to encapsulate content */
+  height: auto !important;
+  display: block !important;
+}
+/* --- Fix Thumbnail Cutoff & Add Borders --- */
+
+/* 1. Re-enable scrolling so content doesn't get cut off on small screens, but keep scrollbar hidden */
+#quickview-modal .modal-container {
+  overflow-y: auto !important; 
+  overflow-x: hidden !important;
+}
+
+/* 2. Add border and padding to all thumbnails to make them look like premium frames (Amazon style) */
+.qv-thumb {
+  border: 2px solid #e5e7eb !important;
+  padding: 2px !important;
+  background: #fff !important;
+  opacity: 1 !important; /* Remove the faded look, it makes them look disabled */
+}
+
+/* 3. Inactive hover state */
+.qv-thumb:hover {
+  border-color: #9ca3af !important;
+}
+
+/* 4. Active state with gold border */
+.qv-thumb.active {
+  border-color: #C9A227 !important;
+}
+/* --- Modal Scroll Lock & Borders --- */
+
+/* 1. Prevent background page from scrolling when Quick View is open */
+body:has(#quickview-modal:not(.hidden)) {
+  overflow: hidden !important;
+}
+
+/* 2. Add border to the Big Image */
+.qv-main-img-wrapper {
+  border: 1px solid #e5e7eb !important;
+  padding: 4px !important;
+  background: #fff !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02) !important;
+  border-radius: 12px !important;
+}
+
+/* 3. Add border to the Modal Container itself */
+#quickview-modal .modal-container {
+  border: 1.5px solid rgba(212,175,55,0.4) !important; /* Subtle Gold Border */
+}
+
+/* Ensure the modal content itself never forces a scrollbar unless absolutely necessary */
+#quickview-modal .modal-container {
+  overflow: hidden !important;
+}
+/* --- Final Layout Fix: No Scroll & Main Image Border --- */
+
+/* 1. Modal Container: Remove scroll, reduce padding to save vertical space */
+#quickview-modal .modal-container {
+  padding: 2rem !important;
+  overflow: hidden !important; /* NO SCROLLING */
+  max-height: 95vh !important;
+}
+
+/* 2. Main Image Wrapper: Constrain height so it NEVER pushes thumbnails out */
+.qv-main-img-wrapper {
+  aspect-ratio: auto !important; /* Remove 1:1 square ratio */
+  height: 48vh !important;       /* Dynamically size based on screen height */
+  max-height: 450px !important;
+  margin-bottom: 1rem !important;
+  
+  /* User Request: Add border to main image */
+  border: 2px solid #e5e7eb !important;
+  padding: 4px !important;
+  background: #fff !important;
+  border-radius: 12px !important;
+  
+  /* Flex to center the image */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* 3. Main Image: Fit inside perfectly without cropping */
+.qv-main-img-wrapper img {
+  height: 100% !important;
+  width: 100% !important;
+  object-fit: contain !important; /* Contain prevents cropping */
+  border-radius: 8px !important;
+}
+
+/* 4. Reduce grid gap to bring columns slightly closer */
+#quickview-modal .product-detail-layout {
+  gap: 2.5rem !important;
+}
+
+/* 5. Slightly adjust right-column text spacing to ensure it also fits perfectly */
+#quickview-modal .detail-title {
+  font-size: 1.6rem !important;
+  margin-bottom: 0.5rem !important;
+}
+#quickview-modal .detail-desc {
+  margin-bottom: 1.5rem !important;
+  line-height: 1.5 !important;
+}
+/* --- Make main image fill the box completely --- */
+.qv-main-img-wrapper {
+  width: 100% !important;
+  overflow: hidden !important;
+}
+
+.qv-main-img-wrapper img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important; /* This forces the image to fill the box completely without empty spaces */
+}
+/* --- Image Border Hug & Zoom Cursor Removal --- */
+
+/* 1. Wrapper: Remove border and background, make it a pure centering container */
+.qv-main-img-wrapper {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  cursor: default !important; /* Remove any magnifying glass zoom cursor */
+}
+
+/* 2. Image: Apply border directly here so it tightly hugs the image shape without empty space */
+.qv-main-img-wrapper img {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important; /* Prevent cropping completely */
+  
+  /* Add border directly to image */
+  border: 2px solid #e5e7eb !important;
+  padding: 4px !important;
+  background: #fff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
+  
+  cursor: default !important; /* Ensure no zoom cursor on the image itself */
+}
+/* --- Final Alignment & UI Precision Fix --- */
+
+/* 1. Modal Padding (40px all sides) & Vertically Center Content */
+#quickview-modal .modal-container {
+  padding: 40px !important;
+}
+#quickview-modal-content {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  height: 100% !important;
+}
+
+/* 2. Grid Layout Alignment & Horizontal Spacing (40px gap) */
+#quickview-modal .product-detail-layout {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 40px !important;
+  align-items: start !important; /* Ensure both sides start at the exact same top position */
+  width: 100% !important;
+}
+
+/* 3. Left Gallery Centering */
+.detail-gallery {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+.qv-main-img-wrapper {
+  margin-bottom: 20px !important;
+}
+.qv-thumbnail-gallery {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 16px !important;
+  width: 100% !important;
+}
+
+/* 4. Right Section Consistent Vertical Spacing (16-20px) */
+#quickview-modal .product-detail-layout > div:nth-child(2) {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 18px !important; /* 18px is between 16 and 20 */
+  padding-top: 0 !important;
+}
+
+/* Remove all manual margins from right-side children to enforce consistent flex gap */
+#quickview-modal .detail-meta-cat,
+#quickview-modal .detail-title,
+#quickview-modal .detail-price-row,
+#quickview-modal .detail-stock-status,
+#quickview-modal .detail-desc,
+#quickview-modal .qv-purchase-options,
+#quickview-modal .btn-view-details-qv {
+  margin: 0 !important;
+  padding: 0 !important;
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+#quickview-modal .detail-price-row {
+  border-bottom: none !important; /* If any */
+}
+
+/* 5. Title & General Styling (Amazon look) */
+#quickview-modal .detail-title {
+  line-height: 1.3 !important;
+  font-size: 1.8rem !important;
+}
+
+/* 6. Purchase Options & Buttons */
+#quickview-modal .qv-purchase-options {
+  display: flex !important;
+  gap: 16px !important;
+  width: 100% !important;
+}
+
+#quickview-modal .btn-qv-action {
+  flex: 1 !important;
+  height: 48px !important; /* Same height */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* 7. Unhide and Align View Full Details Button */
+#quickview-modal .btn-view-details-qv {
+  display: flex !important;
+  width: 100% !important;
+  height: 48px !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+/* --- Final Touchups --- */
+
+/* 1. Hide the View Full Details button as requested */
+#quickview-modal .btn-view-details-qv {
+  display: none !important;
+}
+
+/* 2. Center the main image perfectly in the left column */
+.qv-main-img-wrapper {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+/* --- Square Border Centered Image Fix --- */
+
+/* 1. Remove border from the image itself and restore normal display */
+.qv-main-img-wrapper img {
+  border: none !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important; 
+  border-radius: 4px !important;
+}
+
+/* 2. Apply the Square Border to the Wrapper instead, and center it */
+.qv-main-img-wrapper {
+  aspect-ratio: 1/1 !important; /* Perfect square shape */
+  max-height: 48vh !important;  /* Keep it fitting the screen */
+  max-width: 100% !important;
+  width: auto !important;       /* Allow width to shrink to match height */
+  height: 100% !important;      /* Let it take height up to max-height */
+  
+  margin: 0 auto 20px auto !important; /* Center horizontally in the left column */
+  
+  /* Apply border and padding to the square box */
+  border: 2px solid #e5e7eb !important;
+  padding: 12px !important;
+  background: #fff !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
+  
+  /* Center the image INSIDE the square box */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+/* --- EMERGENCY FIX: COLLAPSED MAIN IMAGE --- */
+
+/* 1. Force the wrapper to have a strict, visible size */
+.qv-main-img-wrapper {
+  width: 100% !important;
+  max-width: 380px !important; /* Ensures it never gets too large or cuts off */
+  aspect-ratio: 1/1 !important; /* Perfect square */
+  height: auto !important;      /* Let aspect-ratio determine height */
+  
+  margin: 0 auto 20px auto !important; /* Horizontally center */
+  
+  /* The square border the user requested */
+  border: 2px solid #e5e7eb !important;
+  padding: 12px !important;
+  background: #fff !important;
+  border-radius: 16px !important;
+  
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* 2. Ensure image scales up properly inside the box */
+.qv-main-img-wrapper img {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important; 
+  border: none !important;
+}
+/* --- Remove Border & Fix Centering Issue --- */
+
+/* 1. Remove the border box entirely and use a transparent centering wrapper */
+.qv-main-img-wrapper {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  
+  width: 100% !important;
+  max-width: 100% !important; /* Remove the 380px restriction */
+  height: 48vh !important;    /* Fixed vertical space so layout doesn't jump */
+  max-height: 450px !important;
+  
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important; /* Flex centering */
+}
+
+/* 2. Image rules: ensure it shrinks proportionally and ALWAYS centers */
+.qv-main-img-wrapper img {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important; /* Never crop */
+  
+  margin: 0 auto !important; /* Fallback horizontal centering */
+  display: block !important;
+  
+  /* Remove any accidental borders on the image itself */
+  border: none !important;
+  background: transparent !important;
+}
+/* --- Final Bug Fixes --- */
+
+/* 1. Fix Image Aligning to Left (Override old absolute positioning) */
+.qv-main-img-wrapper img {
+  position: static !important; /* This stops the image from sticking to the left edge! */
+  margin: 0 auto !important;
+  display: block !important;
+}
+
+/* 2. Fix the X Close Bug (Remove the CSS body scroll lock that causes issues in some browsers) */
+body:has(#quickview-modal:not(.hidden)) {
+  overflow: visible !important; /* Revert the experimental :has selector */
+}
+/* --- Final Ultra Strict Fixes --- */
+
+/* 1. Fix the X button jumping/bugging on hover! 
+   (Previous code was accidentally setting position: relative on hover causing it to break) */
+#quickview-modal .close-modal-btn,
+#quickview-modal .close-modal-btn:hover,
+#quickview-modal .close-modal-btn:active {
+  position: absolute !important;
+  z-index: 99999 !important;
+  top: 15px !important;
+  right: 15px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+/* 2. Absolute guarantee for image centering (overrides ANY old positioning rules) */
+.qv-main-img-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+}
+
+.qv-main-img-wrapper img {
+  position: relative !important; /* Force it to flow inside flex, overriding old 'absolute' */
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  margin: 0 auto !important;
+  display: block !important;
+}
+/* --- MAKE MAIN IMAGE BIGGER --- */
+
+/* 1. Remove square restrictions and give it plenty of height */
+.qv-main-img-wrapper {
+  width: 100% !important;
+  max-width: none !important;    /* Remove old 380px restriction */
+  aspect-ratio: auto !important; /* Remove square shape restriction */
+  
+  height: 55vh !important;       /* Much taller space (55% of screen height) */
+  max-height: 600px !important;  
+  
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* 2. Force the image to scale UP to fill the space */
+.qv-main-img-wrapper img {
+  width: 100% !important;        /* Force stretch to container bounds */
+  height: 100% !important;       /* Force stretch to container bounds */
+  object-fit: contain !important; /* But 'contain' prevents it from distorting or cropping */
+  
+  position: relative !important;
+  margin: 0 auto !important;
+  display: block !important;
+}
+/* --- Remove Thumbnails from Product Cards --- */
+.product-card .card-thumbnails {
+  display: none !important;
+}
+/* --- Fix Specs Table Text Hugging Border --- */
+.specs-table td:first-child {
+  padding-left: 18px !important;
+}
+.specs-table td:last-child {
+  padding-right: 18px !important;
+}

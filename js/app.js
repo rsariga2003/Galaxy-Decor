@@ -393,7 +393,7 @@ class ECommerceApp {
         <div class="empty-cart-message">
           <i data-lucide="shopping-bag" class="empty-icon"></i>
           <p>Your shopping bag is empty.</p>
-          <a href="#/products" class="btn btn-gold btn-sm">Explore Collection</a>
+          <a href="/products" class="btn btn-gold btn-sm">Explore Collection</a>
         </div>
       `;
       footerContainer.classList.add("hidden");
@@ -495,19 +495,36 @@ class ECommerceApp {
 
   // --- Modal Quick View Handler ---
   openQuickView(productId) {
-    const product = this.products.find(p => p.id === productId);
+    const product = this.products.find(p => String(p.id) === String(productId));
     if (!product) return;
 
     const modal = document.getElementById("quickview-modal");
     const content = document.getElementById("quickview-modal-content");
     if (!modal || !content) return;
 
+    let qvThumbnailsHTML = "";
+    const imagesArray = product.gallery || [product.image];
+    if (imagesArray && imagesArray.length > 1) {
+      const thumbs = imagesArray.slice(0, 3);
+      qvThumbnailsHTML = `<div class="qv-thumbnail-gallery">
+        ${thumbs.map((imgStr, idx) => {
+          const resolvedSrc = (imgStr.startsWith("http") || imgStr.startsWith("data:")) ? imgStr : `/assets/products/${imgStr}`;
+          return `
+          <div class="qv-thumb ${idx === 0 ? "active" : ""}" data-src="${resolvedSrc}">
+            <img src="${resolvedSrc}" alt="thumb">
+          </div>
+          `;
+        }).join("")}
+      </div>`;
+    }
+
     content.innerHTML = `
       <div class="product-detail-layout" style="gap: var(--spacing-lg);">
         <div class="detail-gallery">
-          <div class="detail-main-img-wrapper" style="cursor: default;">
+          <div class="detail-main-img-wrapper qv-main-img-wrapper">
             ${this.renderProductImageHTML(product, "detail-main-img")}
           </div>
+          ${qvThumbnailsHTML}
         </div>
         <div>
           <span class="detail-meta-cat">${this.getCategoryName(product.category)}</span>
@@ -525,21 +542,33 @@ class ECommerceApp {
           
           <p class="detail-desc" style="font-size: 0.85rem; line-height: 1.5; margin-bottom: var(--spacing-md);">${product.desc || product.shortDesc}</p>
           
-          <div class="detail-purchase-options" style="border-bottom:none; padding-bottom:0; margin-bottom:var(--spacing-md);">
-            <div class="purchase-row">
-              <div class="purchase-actions">
-                <button class="btn btn-gold btn-add-cart-qv" ${!product.inStock ? "disabled style='opacity:0.6; cursor:not-allowed;'" : ""}><i data-lucide="shopping-cart" style="width:14px;height:14px;margin-right:8px;"></i> ${!product.inStock ? "Sold Out" : "Add To Cart"}</button>
-                <button class="btn btn-black btn-buy-qv" ${!product.inStock ? "disabled style='opacity:0.6; cursor:not-allowed;'" : ""}>Buy Now</button>
-              </div>
-            </div>
+          <div class="qv-purchase-options">
+            <button class="btn btn-gold btn-qv-action btn-add-cart-qv" ${!product.inStock ? "disabled" : ""}>
+              <i data-lucide="shopping-cart"></i> ${!product.inStock ? "Sold Out" : "Add To Cart"}
+            </button>
+            <button class="btn btn-black btn-qv-action btn-buy-qv" ${!product.inStock ? "disabled" : ""}>
+              Buy Now
+            </button>
           </div>
           
-          <a href="#/product/${product.id}" class="btn btn-outline-black btn-block btn-sm btn-view-details-qv" style="text-align: center;">View Full Details</a>
+          <a href="/product/${product.id}" class="btn btn-outline-black btn-qv-action btn-view-details-qv" style="margin-top: 10px;">View Full Details</a>
         </div>
       </div>
     `;
 
     lucide.createIcons();
+
+    // Bind thumbnail clicks
+    const mainImgEl = content.querySelector(".detail-main-img-wrapper img");
+    content.querySelectorAll(".qv-thumb").forEach(thumb => {
+      thumb.addEventListener("click", () => {
+        content.querySelectorAll(".qv-thumb").forEach(t => t.classList.remove("active"));
+        thumb.classList.add("active");
+        if (mainImgEl) {
+          mainImgEl.src = thumb.getAttribute("data-src");
+        }
+      });
+    });
 
     // Bind modal actions
     content.querySelector(".btn-add-cart-qv").addEventListener("click", () => {
@@ -567,36 +596,51 @@ class ECommerceApp {
   // --- Helper: Render Product Grid Card ---
   renderProductCardHTML(p) {
     let hasDiscount = !!p.offerPrice;
-    let isWishlisted = this.wishlist.includes(p.id);
+    let isWishlisted = this.wishlist.includes(String(p.id));
     let discountPct = hasDiscount ? Math.round(((p.price - p.offerPrice) / p.price) * 100) : 0;
     
+    let thumbnailsHTML = "";
+    if (p.images && p.images.length > 0) {
+      const thumbs = p.images.slice(0, 3);
+      thumbnailsHTML = `<div class="card-thumbnails">
+        ${thumbs.map(img => `<div class="card-thumb"><img src="${img}" loading="lazy" alt="thumb"></div>`).join('')}
+      </div>`;
+    } else {
+      let fallbackImg = "";
+      if (p.image && !p.image.startsWith("default_") && !p.image.startsWith("placeholder")) {
+        fallbackImg = (p.image.startsWith("http") || p.image.startsWith("data:")) ? p.image : `/assets/products/${p.image}`;
+        thumbnailsHTML = `<div class="card-thumbnails"><div class="card-thumb"><img src="${fallbackImg}" loading="lazy" alt="thumb"></div></div>`;
+      }
+    }
+    
     return `
-      <article class="product-card card-hover-effect" data-id="${p.id}">
+      <article class="product-card" data-id="${p.id}">
         <div class="product-image-wrapper">
-          <a href="#/product/${p.id}">
+          <a href="/product/${p.id}">
             ${this.renderProductImageHTML(p, "product-img")}
           </a>
           
           <div class="product-badge-group">
             ${p.isNew ? `<span class="product-badge badge-new">New</span>` : ""}
             ${hasDiscount ? `<span class="product-badge badge-discount">-${discountPct}%</span>` : ""}
-            ${!p.inStock ? `<span class="product-badge badge-out-stock" style="background:#dc3545; color:white;">Sold Out</span>` : ""}
+            ${!p.inStock ? `<span class="product-badge badge-out-stock">Sold Out</span>` : ""}
           </div>
           
           <button class="wishlist-add-btn ${isWishlisted ? "wishlisted" : ""}" data-id="${p.id}" aria-label="Toggle Wishlist">
-            <i data-lucide="heart" style="width: 18px; height: 18px; ${isWishlisted ? "fill: #C9A227; stroke: #C9A227;" : ""}"></i>
+            <i data-lucide="heart" style="width: 16px; height: 16px; ${isWishlisted ? "fill: #C9A227; stroke: #C9A227;" : ""}"></i>
           </button>
           
-          <div class="product-action-overlay">
-            <button class="btn btn-black btn-block btn-sm btn-quickview" data-id="${p.id}"><i data-lucide="eye" style="width:12px;height:12px;margin-right:5px;"></i> Quick View</button>
-            <button class="btn btn-gold btn-block btn-sm btn-add-cart" data-id="${p.id}" ${!p.inStock ? "disabled style='opacity:0.6; cursor:not-allowed;'" : ""}><i data-lucide="shopping-bag" style="width:12px;height:12px;margin-right:5px;"></i> ${!p.inStock ? "Sold Out" : "Add"}</button>
+          <div class="quickview-bar-overlay">
+            <button class="btn-quickview-bar btn-quickview" data-id="${p.id}" title="Quick View">
+              <i data-lucide="eye" style="width:14px;height:14px;margin-right:6px;"></i> Quick View
+            </button>
           </div>
         </div>
         
         <div class="product-card-info">
+          ${thumbnailsHTML}
           <span class="product-card-cat">${this.getCategoryName(p.category)}</span>
-          <h3 class="product-card-title"><a href="#/product/${p.id}">${p.name}</a></h3>
-          <p class="product-card-desc">${p.shortDesc}</p>
+          <h3 class="product-card-title"><a href="/product/${p.id}">${p.name}</a></h3>
           <div class="product-card-price-row">
             <span class="price-actual">${window.GalaxyUtils.formatCurrency(p.offerPrice || p.price)}</span>
             ${hasDiscount ? `<span class="price-original">${window.GalaxyUtils.formatCurrency(p.price)}</span>` : ""}
@@ -605,6 +649,7 @@ class ECommerceApp {
         
         <div class="product-card-footer">
           <button class="btn btn-outline-black btn-sm btn-buy-now" data-id="${p.id}" ${!p.inStock ? "disabled style='opacity:0.6; cursor:not-allowed;'" : ""}>Buy Now</button>
+          <button class="btn btn-gold btn-sm btn-add-cart" data-id="${p.id}" ${!p.inStock ? "disabled style='opacity:0.6; cursor:not-allowed;'" : ""}><i data-lucide="shopping-bag" style="width:14px;height:14px;margin-right:4px;"></i> ${!p.inStock ? "Sold Out" : "Add"}</button>
         </div>
       </article>
     `;
@@ -623,15 +668,17 @@ class ECommerceApp {
         this.toggleWishlist(id);
         
         // Toggle icon visual quickly
-        let icon = btn.querySelector("i");
+        let icon = btn.querySelector("svg") || btn.querySelector("i");
         let isWish = this.wishlist.includes(id);
         btn.classList.toggle("wishlisted", isWish);
-        if (isWish) {
-          icon.style.fill = "#C9A227";
-          icon.style.stroke = "#C9A227";
-        } else {
-          icon.style.fill = "none";
-          icon.style.stroke = "currentColor";
+        if (icon) {
+          if (isWish) {
+            icon.style.fill = "#C9A227";
+            icon.style.stroke = "#C9A227";
+          } else {
+            icon.style.fill = "none";
+            icon.style.stroke = "currentColor";
+          }
         }
       });
     });
@@ -683,8 +730,8 @@ class ECommerceApp {
             <h1 class="hero-title" style="margin-top: 2rem;">Elevate Your Living <span>Spaces</span></h1>
             <p class="hero-desc">Curated minimalist lines, gold metallic finishes, and premium imported furniture designed for luxury homes.</p>
             <div class="hero-actions">
-              <a href="#/products" class="btn btn-gold">Explore Showroom</a>
-              <a href="#/contact" class="btn btn-outline-white" onclick="window.navigateToContact(); return false;">Book Consultation</a>
+              <a href="/products" class="btn btn-gold">Explore Showroom</a>
+              <a href="/contact" class="btn btn-outline-white" onclick="window.navigateToContact(); return false;">Book Consultation</a>
             </div>
           </div>
         </div>
@@ -707,7 +754,7 @@ class ECommerceApp {
             <!-- Injected dynamically -->
           </div>
           <div style="text-align: center; margin-top: var(--spacing-xl);">
-            <a href="#/products" class="btn btn-black btn-lg">Explore Full Catalog</a>
+            <a href="/products" class="btn btn-black btn-lg">Explore Full Catalog</a>
           </div>
         </div>
       </section>
@@ -732,7 +779,7 @@ class ECommerceApp {
             `).join("")}
           </div>
           <div style="text-align: center; margin-top: var(--spacing-xl);">
-            <a href="#/categories" class="btn btn-outline-black">View All Categories</a>
+            <a href="/categories" class="btn btn-outline-black">View All Categories</a>
           </div>
         </div>
       </section>
@@ -1252,9 +1299,10 @@ class ECommerceApp {
               <h4 class="filter-group-title">Category</h4>
               <div class="filter-options">
                 ${this.categories.map(c => `
-                  <label class="checkbox-label">
+                  <label class="custom-checkbox">
                     <input type="checkbox" name="f-category" value="${c.id}" ${activeCategory === c.id ? "checked" : ""}>
-                    <span>${c.name}</span>
+                    <span class="checkmark"></span>
+                    <span class="checkbox-text">${c.name}</span>
                   </label>
                 `).join("")}
               </div>
@@ -1276,9 +1324,10 @@ class ECommerceApp {
             <div class="filter-group">
               <h4 class="filter-group-title">Availability</h4>
               <div class="filter-options">
-                <label class="checkbox-label">
+                <label class="custom-checkbox">
                   <input type="checkbox" id="filter-stock-only">
-                  <span>Exclude Out of Stock</span>
+                  <span class="checkmark"></span>
+                  <span class="checkbox-text">Exclude Out of Stock</span>
                 </label>
               </div>
             </div>
@@ -1446,7 +1495,7 @@ class ECommerceApp {
 
   // --- 5. Render PRODUCT DETAILS ---
   renderProductDetail(productId) {
-    const product = this.products.find(p => p.id === productId);
+    const product = this.products.find(p => String(p.id) === String(productId));
     if (!product) {
       window.GalaxyRouter.navigate("/products");
       return;
@@ -1467,27 +1516,29 @@ class ECommerceApp {
         </div>
         <div class="product-detail-layout">
           <!-- Gallery -->
-          <div class="detail-gallery">
-            <div class="detail-main-img-wrapper" id="detail-main-image-wrapper">
+          <div class="detail-gallery" style="display:flex !important; flex-direction:column !important; align-items:center !important; width:100% !important;">
+            <div class="qv-main-img-wrapper" id="detail-main-image-wrapper" style="width:100% !important; max-width:none !important; margin-bottom:20px !important;">
               ${this.renderProductImageHTML(product, "detail-main-img")}
             </div>
             
             <!-- thumbnails -->
-            <div class="detail-thumbnails">
+            <div class="qv-thumbnail-gallery" style="width:100% !important; margin-bottom:20px !important;">
               ${images.map((img, i) => {
-                if (!img || img.startsWith("default_") || img.startsWith("placeholder")) {
+                const src = (img && !img.startsWith("default_") && !img.startsWith("placeholder"))
+                  ? ((img.startsWith("http") || img.startsWith("data:")) ? img : `/assets/products/${img}`)
+                  : null;
+                
+                if (!src) {
                   return `
-                    <div class="thumb-img-wrapper ${i === 0 ? "active" : ""}" data-index="${i}">
-                      <div class="thumb-img fallback-svg-container">${window.GalaxyUtils.getPremiumFurnitureSVG(product.category, product.name)}</div>
+                    <div class="qv-thumb ${i === 0 ? "active" : ""}" data-index="${i}">
+                      <div class="fallback-svg-container">${window.GalaxyUtils.getPremiumFurnitureSVG(product.category, product.name)}</div>
                     </div>
                   `;
                 }
-                const src = (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:"))
-                  ? img
-                  : `/assets/products/${img}`;
+                
                 return `
-                  <div class="thumb-img-wrapper ${i === 0 ? "active" : ""}" data-index="${i}">
-                    <img src="${src}" alt="${product.name}" class="thumb-img" loading="lazy" onerror="this.outerHTML='<div class=\\'thumb-img fallback-svg-container\\'>'+window.GalaxyUtils.getPremiumFurnitureSVG('${product.category.replace(/'/g, "\\'")}', '${product.name.replace(/'/g, "\\'")}')+'</div>'">
+                  <div class="qv-thumb ${i === 0 ? "active" : ""}" data-index="${i}" data-src="${src}">
+                    <img src="${src}" alt="${product.name}" loading="lazy" onerror="this.outerHTML='<div class=\\'fallback-svg-container\\'>'+window.GalaxyUtils.getPremiumFurnitureSVG('${product.category.replace(/'/g, "\\'")}', '${product.name.replace(/'/g, "\\'")}')+'</div>'">
                   </div>
                 `;
               }).join("")}
@@ -1589,7 +1640,7 @@ class ECommerceApp {
     window.GalaxyUtils.initImageZoom(wrapper, mainImg);
 
     // Thumbnails swap
-    const thumbs = document.querySelectorAll(".thumb-img-wrapper");
+    const thumbs = document.querySelectorAll(".qv-thumb");
     thumbs.forEach(thumb => {
       thumb.addEventListener("click", () => {
         thumbs.forEach(t => t.classList.remove("active"));
@@ -1666,7 +1717,7 @@ class ECommerceApp {
             <i data-lucide="shopping-bag" style="width: 64px; height: 64px; stroke-width: 1px; color: var(--color-secondary-muted); margin-bottom: var(--spacing-md);"></i>
             <h1 class="section-title" style="font-size:2rem; margin-bottom:10px;">Your Shopping Bag is Empty</h1>
             <p style="color:var(--color-secondary-muted); margin-bottom:var(--spacing-xl);">You haven't added any luxury furniture pieces yet.</p>
-            <a href="#/products" class="btn btn-gold">Explore Collections</a>
+            <a href="/products" class="btn btn-gold">Explore Collections</a>
           </div>
         </section>
       `;
@@ -1706,7 +1757,7 @@ class ECommerceApp {
                 <input type="text" class="form-control" id="coupon-code" placeholder="Enter Coupon Code" required>
                 <button type="submit" class="btn btn-outline-black btn-sm">Apply Code</button>
               </form>
-              <a href="#/products" class="btn btn-outline-gold btn-sm"><i data-lucide="arrow-left" style="width:12px;height:12px;margin-right:5px;"></i> Continue Shopping</a>
+              <a href="/products" class="btn btn-outline-gold btn-sm"><i data-lucide="arrow-left" style="width:12px;height:12px;margin-right:5px;"></i> Continue Shopping</a>
             </div>
           </div>
 
@@ -1729,7 +1780,7 @@ class ECommerceApp {
                 </tr>
               </tbody>
             </table>
-            <a href="#/checkout" class="btn btn-gold btn-block">Proceed To Checkout</a>
+            <a href="/checkout" class="btn btn-gold btn-block">Proceed To Checkout</a>
           </div>
         </div>
       </section>
@@ -1769,7 +1820,7 @@ class ECommerceApp {
             <div class="cart-product-cell">
               ${this.renderProductImageHTML(p, "cart-product-img")}
               <div class="cart-product-info">
-                <h3><a href="#/product/${p.id}">${p.name}</a></h3>
+                <h3><a href="/product/${p.id}">${p.name}</a></h3>
                 <p>Category: ${this.getCategoryName(p.category)}</p>
               </div>
             </div>
@@ -2276,7 +2327,7 @@ class ECommerceApp {
           </div>
 
           <div class="success-actions">
-            <a href="#/products" class="btn btn-gold">Back To Showroom</a>
+            <a href="/products" class="btn btn-gold">Back To Showroom</a>
             <a href="${whatsappUrl}" target="_blank" class="btn btn-success-wa"><i data-lucide="send" style="width:14px;height:14px;margin-right:6px;"></i> Send Bill to My WhatsApp</a>
           </div>
         </div>
@@ -2295,7 +2346,7 @@ class ECommerceApp {
             <i data-lucide="heart" style="width: 64px; height: 64px; stroke-width: 1px; color: var(--color-secondary-muted); margin-bottom: var(--spacing-md);"></i>
             <h1 class="section-title" style="font-size:2rem; margin-bottom:10px;">Your Wishlist is Empty</h1>
             <p style="color:var(--color-secondary-muted); margin-bottom:var(--spacing-xl);">Save items from our catalog to review or request quotes later.</p>
-            <a href="#/products" class="btn btn-gold">Explore Collections</a>
+            <a href="/products" class="btn btn-gold">Explore Collections</a>
           </div>
         </section>
       `;
@@ -2405,3 +2456,4 @@ window.addEventListener("DOMContentLoaded", () => {
   }
   window.GalaxyApp = new ECommerceApp();
 });
+
