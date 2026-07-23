@@ -963,17 +963,17 @@ class ECommerceApp {
             <button id="btn-toggle-review-form" class="btn btn-outline-gold btn-sm">Write a Review</button>
           </div>
           
-          <div id="review-form-container" style="display: none; max-width: 600px; margin: var(--spacing-xl) auto 0; background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.25); border-radius: 18px; padding: 2.25rem; box-shadow: var(--shadow-lg); transition: all 0.3s ease;">
+          <div id="review-form-container" class="review-form-box" style="display: none;">
             <h3 style="color:#ffffff; font-family:var(--font-serif); font-size:1.4rem; margin-bottom:1.5rem; text-align:center; letter-spacing: 0.02em;">Share Your Experience</h3>
             <form id="client-review-form">
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:1.25rem;">
+              <div class="review-form-grid">
                 <div class="form-group" style="margin-bottom: 0;">
                   <label for="rev-author" style="color:rgba(255,255,255,0.7); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; display:block; margin-bottom:0.4rem; font-weight: 600;">Your Name</label>
                   <input type="text" id="rev-author" required placeholder="e.g. Anand Kumar" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; width:100%; border-radius:8px; padding:0.7rem 1.1rem; font-size: 0.85rem;">
                 </div>
                 <div class="form-group" style="margin-bottom: 0;">
                   <label for="rev-title" style="color:rgba(255,255,255,0.7); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; display:block; margin-bottom:0.4rem; font-weight: 600;">Location / Designation</label>
-                  <input type="text" id="rev-title" required placeholder="e.g. Homeowner, Erode" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; width:100%; border-radius:8px; padding:0.7rem 1.1rem; font-size: 0.85rem;">
+                  <input type="text" id="rev-title" required placeholder="e.g. Homeowner" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; width:100%; border-radius:8px; padding:0.7rem 1.1rem; font-size: 0.85rem;">
                 </div>
               </div>
               <div class="form-group" style="margin-bottom:1.25rem;">
@@ -1355,47 +1355,53 @@ class ECommerceApp {
       <section class="py-section container">
         <div class="catalog-layout">
           <!-- Sidebar Filters -->
-          <aside class="filters-sidebar" id="catalog-filters-sidebar">
-            <div class="filters-header">
-              <span class="filters-title">Filter Selection</span>
+          <aside class="filters-sidebar collapsed" id="catalog-filters-sidebar">
+            <div class="filters-header" id="filters-header-toggle">
+              <div class="filters-title-wrap">
+                <i data-lucide="sliders-horizontal" class="filters-header-icon"></i>
+                <span class="filters-title">Filter Selection</span>
+                <i data-lucide="chevron-down" class="filter-collapse-chevron"></i>
+              </div>
               <button class="clear-filters-btn" id="btn-clear-filters">Clear All</button>
             </div>
             
-            <!-- Category Filter -->
-            <div class="filter-group">
-              <h4 class="filter-group-title">Category</h4>
-              <div class="filter-options">
-                ${this.categories.map(c => `
-                  <label class="custom-checkbox">
-                    <input type="checkbox" name="f-category" value="${c.id}" ${activeCategory === c.id ? "checked" : ""}>
-                    <span class="checkmark"></span>
-                    <span class="checkbox-text">${c.name}</span>
-                  </label>
-                `).join("")}
-              </div>
-            </div>
-
-            <!-- Price Filter -->
-            <div class="filter-group">
-              <h4 class="filter-group-title">Price Limit</h4>
-              <div class="price-range-wrapper">
-                <input type="range" id="filter-price-slider" class="price-slider-input" min="0" max="150000" step="5000" value="150000">
-                <div class="price-range-values">
-                  <span>₹0</span>
-                  <span id="price-slider-value">Max: ₹1,50,000</span>
+            <div class="filters-body-wrapper" id="filters-body-wrapper">
+              <!-- Category Filter -->
+              <div class="filter-group">
+                <h4 class="filter-group-title">Category</h4>
+                <div class="filter-options">
+                  ${this.categories.map(c => `
+                    <label class="custom-checkbox">
+                      <input type="checkbox" name="f-category" value="${c.id}" ${activeCategory === c.id ? "checked" : ""}>
+                      <span class="checkmark"></span>
+                      <span class="checkbox-text">${c.name}</span>
+                    </label>
+                  `).join("")}
                 </div>
               </div>
-            </div>
 
-            <!-- Availability Filter -->
-            <div class="filter-group">
-              <h4 class="filter-group-title">Availability</h4>
-              <div class="filter-options">
-                <label class="custom-checkbox">
-                  <input type="checkbox" id="filter-stock-only">
-                  <span class="checkmark"></span>
-                  <span class="checkbox-text">Exclude Out of Stock</span>
-                </label>
+              <!-- Price Filter -->
+              <div class="filter-group">
+                <h4 class="filter-group-title">Price Limit</h4>
+                <div class="price-range-wrapper">
+                  <input type="range" id="filter-price-slider" class="price-slider-input" min="0" max="150000" step="5000" value="150000">
+                  <div class="price-range-values">
+                    <span>₹0</span>
+                    <span id="price-slider-value">Max: ₹1,50,000</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Availability Filter -->
+              <div class="filter-group">
+                <h4 class="filter-group-title">Availability</h4>
+                <div class="filter-options">
+                  <label class="custom-checkbox">
+                    <input type="checkbox" id="filter-stock-only">
+                    <span class="checkmark"></span>
+                    <span class="checkbox-text">Exclude Out of Stock</span>
+                  </label>
+                </div>
               </div>
             </div>
           </aside>
@@ -1447,6 +1453,16 @@ class ECommerceApp {
     const stockCheckbox = document.getElementById("filter-stock-only");
     const sortSelect = document.getElementById("catalog-sort");
     const clearBtn = document.getElementById("btn-clear-filters");
+
+    // Collapsible Mobile Filter Sidebar Listener
+    const filterHeader = document.getElementById("filters-header-toggle");
+    const filterSidebar = document.getElementById("catalog-filters-sidebar");
+    if (filterHeader && filterSidebar) {
+      filterHeader.addEventListener("click", (e) => {
+        if (e.target.closest("#btn-clear-filters")) return;
+        filterSidebar.classList.toggle("collapsed");
+      });
+    }
 
     // Local filter state
     const filterState = {
