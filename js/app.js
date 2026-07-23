@@ -1,11 +1,11 @@
 function resolveCategoryImage(c) {
   const genericFallback = "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=600&q=80";
-  
+
   // FORCE OVERRIDE for Tea Poys if the user has a broken image saved in local storage
   if (c && c.name && (c.name.toLowerCase() === "tea poys" || c.name.toLowerCase() === "teapoys")) {
-      return genericFallback;
+    return genericFallback;
   }
-  
+
   if (!c.image || c.image.startsWith("placeholder_")) {
     const fallbacks = {
       "living-room": "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80",
@@ -25,13 +25,13 @@ function resolveCategoryImage(c) {
   return c.image.startsWith('http') || c.image.startsWith('data:') ? c.image : '/assets/products/' + c.image;
 }
 
-window.setupPhoneField = function(inputEl) {
+window.setupPhoneField = function (inputEl) {
   if (!inputEl) return;
-  
-  inputEl.addEventListener("input", function() {
+
+  inputEl.addEventListener("input", function () {
     let val = this.value.replace(/[^0-9+\-\s]/g, ""); // Keep digits, plus, hyphens, spaces
     let digitsOnly = val.replace(/[^0-9]/g, "");
-    
+
     if (val.startsWith("+")) {
       // Foreign number: limit to 15 digits
       if (digitsOnly.length > 15) {
@@ -64,10 +64,10 @@ window.setupPhoneField = function(inputEl) {
     this.value = val;
   });
 
-  inputEl.addEventListener("blur", function() {
+  inputEl.addEventListener("blur", function () {
     let val = this.value.trim();
     if (!val) return;
-    
+
     let digits = val.replace(/[^0-9]/g, "");
     if (val.startsWith("+")) {
       if (digits.length < 7) {
@@ -87,10 +87,10 @@ class ECommerceApp {
     // 1. Initialize State from LocalStorage or fallbacks
     this.cart = JSON.parse(localStorage.getItem("gd_cart")) || [];
     this.wishlist = JSON.parse(localStorage.getItem("gd_wishlist")) || [];
-    
+
     // Check if synced catalog is loaded, otherwise use fallback data from data.js
     let parsedProducts = null;
-    try { parsedProducts = JSON.parse(localStorage.getItem("gd_products")); } catch (e) {}
+    try { parsedProducts = JSON.parse(localStorage.getItem("gd_products")); } catch (e) { }
     this.products = Array.isArray(parsedProducts) ? parsedProducts : window.GALAXY_DECOR_DB.products;
 
     // Force upgrade categories using a version flag to clear any old cached/broken category image URLs
@@ -99,15 +99,15 @@ class ECommerceApp {
       localStorage.removeItem("gd_categories");
       localStorage.setItem("gd_categories_ver", CAT_VERSION);
     }
-    
+
     let parsedCategories = null;
-    try { parsedCategories = JSON.parse(localStorage.getItem("gd_categories")); } catch (e) {}
+    try { parsedCategories = JSON.parse(localStorage.getItem("gd_categories")); } catch (e) { }
     this.categories = Array.isArray(parsedCategories) ? parsedCategories : window.GALAXY_DECOR_DB.categories;
 
     this.interiorSolutions = window.GALAXY_DECOR_DB.interiorSolutions;
 
     let parsedReviews = null;
-    try { parsedReviews = JSON.parse(localStorage.getItem("gd_reviews")); } catch (e) {}
+    try { parsedReviews = JSON.parse(localStorage.getItem("gd_reviews")); } catch (e) { }
     this.reviews = Array.isArray(parsedReviews) ? parsedReviews : window.GALAXY_DECOR_DB.reviews;
 
     // Check if settings are saved in localStorage for admin management
@@ -124,7 +124,7 @@ class ECommerceApp {
     this.appRoot = document.getElementById("app-root");
     this.cartBadge = document.getElementById("cart-badge");
     this.wishlistBadge = document.getElementById("wishlist-badge");
-    
+
     this.mobileCartCount = document.getElementById("mobile-cart-count");
     this.mobileWishlistCount = document.getElementById("mobile-wishlist-count");
 
@@ -150,7 +150,7 @@ class ECommerceApp {
 
   updateStoreConfig() {
     let storedConfig = null;
-    try { storedConfig = JSON.parse(localStorage.getItem("gd_store")); } catch (e) {}
+    try { storedConfig = JSON.parse(localStorage.getItem("gd_store")); } catch (e) { }
     this.store = (storedConfig && typeof storedConfig === 'object' && !storedConfig.error)
       ? storedConfig
       : (window.GALAXY_DECOR_DB ? window.GALAXY_DECOR_DB.store : {});
@@ -265,7 +265,7 @@ class ECommerceApp {
     }
     this.saveWishlist();
     this.updateBadges();
-    
+
     // Rerender active page if it is wishlist or catalog to keep heart states updated
     let currentHash = window.location.pathname;
     if (currentHash.startsWith("/wishlist")) {
@@ -340,8 +340,8 @@ class ECommerceApp {
         return;
       }
 
-      let matches = this.products.filter(p => 
-        p.name.toLowerCase().includes(query) || 
+      let matches = this.products.filter(p =>
+        p.name.toLowerCase().includes(query) ||
         p.shortDesc.toLowerCase().includes(query) ||
         p.category.toLowerCase().includes(query)
       ).slice(0, 5); // Limit 5
@@ -429,7 +429,7 @@ class ECommerceApp {
   renderCartDrawerItems() {
     const listContainer = document.getElementById("cart-drawer-items");
     const footerContainer = document.getElementById("cart-drawer-footer");
-    
+
     if (!listContainer) return;
 
     if (this.cart.length === 0) {
@@ -532,7 +532,7 @@ class ECommerceApp {
       .on("/refund-policy", () => this.renderPolicy("refund"))
       .on("/shipping-policy", () => this.renderPolicy("shipping"))
       .on("/order-success", () => this.renderOrderSuccess());
-      
+
     // Manually trigger the router now that routes are registered
     window.GalaxyRouter.handleRouting();
   }
@@ -552,24 +552,24 @@ class ECommerceApp {
       const thumbs = imagesArray.slice(0, 3);
       qvThumbnailsHTML = `<div class="qv-thumbnail-gallery">
         ${thumbs.map((imgStr, idx) => {
-          const resolvedSrc = (imgStr && !imgStr.startsWith("default_") && !imgStr.startsWith("placeholder"))
-            ? ((imgStr.startsWith("http") || imgStr.startsWith("data:")) ? imgStr : `/assets/products/${imgStr}`)
-            : null;
-          
-          if (!resolvedSrc) {
-            return `
+        const resolvedSrc = (imgStr && !imgStr.startsWith("default_") && !imgStr.startsWith("placeholder"))
+          ? ((imgStr.startsWith("http") || imgStr.startsWith("data:")) ? imgStr : `/assets/products/${imgStr}`)
+          : null;
+
+        if (!resolvedSrc) {
+          return `
             <div class="qv-thumb ${idx === 0 ? "active" : ""}" data-index="${idx}">
               <div class="fallback-svg-container">${window.GalaxyUtils.getPremiumFurnitureSVG(product.category, product.name)}</div>
             </div>
             `;
-          }
+        }
 
-          return `
+        return `
           <div class="qv-thumb ${idx === 0 ? "active" : ""}" data-src="${resolvedSrc}">
             <img src="${resolvedSrc}" alt="thumb" loading="lazy" onerror="this.outerHTML='<div class=\\'fallback-svg-container\\'>'+window.GalaxyUtils.getPremiumFurnitureSVG('${product.category.replace(/'/g, "\\'")}', '${product.name.replace(/'/g, "\\'")}')+'</div>'">
           </div>
           `;
-        }).join("")}
+      }).join("")}
       </div>`;
     }
 
@@ -588,7 +588,7 @@ class ECommerceApp {
           <div class="detail-price-row" style="margin-bottom: var(--spacing-sm); padding-bottom: var(--spacing-sm);">
             <span class="detail-price-actual" style="font-size: 1.5rem;">${window.GalaxyUtils.formatCurrency(product.offerPrice || product.price)}</span>
             ${product.offerPrice ? `<span class="detail-price-original" style="font-size: 1rem;">${window.GalaxyUtils.formatCurrency(product.price)}</span>` : ""}
-            ${product.offerPrice ? `<span class="detail-discount-badge" style="font-size: 0.65rem;">-${Math.round((product.price - product.offerPrice)/product.price * 100)}%</span>` : ""}
+            ${product.offerPrice ? `<span class="detail-discount-badge" style="font-size: 0.65rem;">-${Math.round((product.price - product.offerPrice) / product.price * 100)}%</span>` : ""}
           </div>
           
           <div class="detail-stock-status" style="margin-bottom: var(--spacing-md); font-weight:600; font-size:0.9rem; color: ${product.inStock ? 'var(--color-success)' : 'var(--color-error)'};">
@@ -653,7 +653,7 @@ class ECommerceApp {
     let hasDiscount = !!p.offerPrice;
     let isWishlisted = this.wishlist.includes(String(p.id));
     let discountPct = hasDiscount ? Math.round(((p.price - p.offerPrice) / p.price) * 100) : 0;
-    
+
     let thumbnailsHTML = "";
     if (p.images && p.images.length > 0) {
       const thumbs = p.images.slice(0, 3);
@@ -667,7 +667,7 @@ class ECommerceApp {
         thumbnailsHTML = `<div class="card-thumbnails"><div class="card-thumb"><img src="${fallbackImg}" loading="lazy" alt="thumb"></div></div>`;
       }
     }
-    
+
     return `
       <article class="product-card" data-id="${p.id}">
         <div class="product-image-wrapper">
@@ -721,7 +721,7 @@ class ECommerceApp {
         e.stopPropagation();
         let id = btn.getAttribute("data-id");
         this.toggleWishlist(id);
-        
+
         // Toggle icon visual quickly
         let icon = btn.querySelector("svg") || btn.querySelector("i");
         let isWish = this.wishlist.includes(id);
@@ -776,24 +776,33 @@ class ECommerceApp {
       <!-- Hero Banner -->
       <section class="hero-section">
         <div class="hero-slider-container" id="hero-slider-container">
-          <div class="hero-slide active" style="background-image: url('/assets/hero_slide_1.jpg');"></div>
-          <div class="hero-slide" style="background-image: url('/assets/hero_slide_2.png');"></div>
+          <div class="hero-slide active" style="background-image: url('/images/hero-bg.jpg');"></div>
         </div>
         <div class="hero-overlay"></div>
         <div class="container hero-content-container">
           <div class="hero-content fade-in-up">
-            <h1 class="hero-title" style="margin-top: 2rem;">Elevate Your Living <span>Spaces</span></h1>
-            <p class="hero-desc">Curated minimalist lines, gold metallic finishes, and premium imported furniture designed for luxury homes.</p>
-            <div class="hero-actions">
-              <a href="/products" class="btn btn-gold">Explore Showroom</a>
-              <a href="/contact" class="btn btn-outline-white" onclick="window.navigateToContact(); return false;">Book Consultation</a>
+            <div class="hero-tag-badge">
+              <span class="hero-star">✦</span>
+              <span class="hero-tag-text">MODERN LIVING, TIMELESS QUALITY</span>
+              <span class="hero-tag-line"></span>
+            </div>
+            <h1 class="hero-title-v2">Elevate Your<br>Living <span class="gold-accent">Spaces</span></h1>
+            <div class="hero-divider">
+              <span class="hero-divider-line"></span>
+              <span class="hero-divider-star">✦</span>
+              <span class="hero-divider-line"></span>
+            </div>
+            <p class="hero-desc-v2">Curated minimalist lines, gold metallic finishes,<br>and premium imported furniture designed<br>for luxury homes.</p>
+            <div class="hero-actions-v2">
+              <a href="/products" class="btn-hero-gold">EXPLORE SHOWROOM <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:8px;"></i></a>
+              <a href="/contact" class="btn-hero-outline" onclick="window.navigateToContact(); return false;">BOOK CONSULTATION <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:8px;"></i></a>
             </div>
           </div>
         </div>
-        <!-- Slider Navigation Indicators -->
-        <div class="hero-slider-indicators">
-          <span class="indicator active" data-slide="0"></span>
-          <span class="indicator" data-slide="1"></span>
+        <div class="hero-dots">
+          <span class="hero-dot active"></span>
+          <span class="hero-dot"></span>
+          <span class="hero-dot"></span>
         </div>
       </section>
 
@@ -892,14 +901,14 @@ class ECommerceApp {
           </div>
           <div class="solutions-grid">
             ${(Array.isArray(this.interiorSolutions) ? this.interiorSolutions : []).slice(0, 3).map(s => {
-              const sTitle = s.title || 'Interior Package';
-              const sSub = s.subtitle || 'Custom Design';
-              const sPrice = s.price || 'Contact for Quote';
-              const sDesc = s.desc || '';
-              const sImg = s.image || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80';
-              const sFeatures = Array.isArray(s.features) ? s.features : [];
+      const sTitle = s.title || 'Interior Package';
+      const sSub = s.subtitle || 'Custom Design';
+      const sPrice = s.price || 'Contact for Quote';
+      const sDesc = s.desc || '';
+      const sImg = s.image || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80';
+      const sFeatures = Array.isArray(s.features) ? s.features : [];
 
-              return `
+      return `
               <div class="solution-card">
                 <div class="solution-img-wrapper">
                   <img
@@ -923,7 +932,7 @@ class ECommerceApp {
                 </div>
               </div>
               `;
-            }).join("")}
+    }).join("")}
           </div>
           <div style="text-align: center; margin-top: var(--spacing-xl);">
             <button class="btn btn-black" onclick="window.navigateToContact()" type="button">Discuss Your Project</button>
@@ -947,9 +956,9 @@ class ECommerceApp {
           <div class="testimonial-marquee-wrapper">
             <div class="testimonial-marquee-track">
               ${(() => {
-                const list = (Array.isArray(this.reviews) && this.reviews.length > 0 ? this.reviews : (window.GALAXY_DECOR_DB ? window.GALAXY_DECOR_DB.reviews : []));
-                const duplicatedList = list.concat(list);
-                return duplicatedList.map(r => `
+        const list = (Array.isArray(this.reviews) && this.reviews.length > 0 ? this.reviews : (window.GALAXY_DECOR_DB ? window.GALAXY_DECOR_DB.reviews : []));
+        const duplicatedList = list.concat(list);
+        return duplicatedList.map(r => `
                   <div class="testimonial-card">
                     <div class="testimonial-quote-badge">”</div>
                     <p class="testimonial-card-text">"${r.text || ''}"</p>
@@ -962,7 +971,7 @@ class ECommerceApp {
                     </div>
                   </div>
                 `).join("");
-              })()}
+      })()}
             </div>
           </div>
           
@@ -1116,7 +1125,7 @@ class ECommerceApp {
       window.setupPhoneField(document.getElementById("c-phone"));
       contactForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        
+
         const phoneVal = document.getElementById("c-phone").value.trim();
         const digitsOnly = phoneVal.replace(/[^0-9]/g, "");
         if (phoneVal.startsWith("+")) {
@@ -1190,12 +1199,12 @@ class ECommerceApp {
     if (clientReviewForm) {
       clientReviewForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        
+
         const author = document.getElementById("rev-author").value.trim();
         const title = document.getElementById("rev-title").value.trim();
         const rating = parseInt(document.getElementById("rev-rating").value);
         const text = document.getElementById("rev-text").value.trim();
-        
+
         const newReview = {
           id: "rev_" + Date.now(),
           author: author || "Anonymous",
@@ -1203,27 +1212,27 @@ class ECommerceApp {
           rating: rating || 5,
           text: text || ""
         };
-        
+
         this.reviews.unshift(newReview);
         localStorage.setItem("gd_reviews", JSON.stringify(this.reviews));
-        
+
         // Sync to Supabase Cloud Backend
         if (window.GalaxyAPI) {
           await window.GalaxyAPI.syncEntity('reviews', 'POST', newReview);
         }
-        
+
         window.GalaxyUtils.showToast("Review submitted successfully!");
-        
+
         clientReviewForm.reset();
         if (reviewModal) reviewModal.classList.add("hidden");
-        
+
         // Re-render homepage so the new review is instantly visible
         this.renderHome();
       });
     }
   }
 
-  initReviewSlider() {}
+  initReviewSlider() { }
 
   // Hero slideshow logic
   initHeroSlider() {
@@ -1446,7 +1455,7 @@ class ECommerceApp {
     const grid = document.getElementById("catalog-products-grid");
     const emptyState = document.getElementById("catalog-empty-state");
     const countEl = document.getElementById("catalog-results-count");
-    
+
     const categoryCheckboxes = document.querySelectorAll('input[name="f-category"]');
     const priceSlider = document.getElementById("filter-price-slider");
     const priceLabel = document.getElementById("price-slider-value");
@@ -1480,8 +1489,8 @@ class ECommerceApp {
       // 1. Search Query
       if (filterState.search) {
         let q = filterState.search.toLowerCase();
-        filtered = filtered.filter(p => 
-          p.name.toLowerCase().includes(q) || 
+        filtered = filtered.filter(p =>
+          p.name.toLowerCase().includes(q) ||
           p.shortDesc.toLowerCase().includes(q) ||
           p.category.toLowerCase().includes(q)
         );
@@ -1562,7 +1571,7 @@ class ECommerceApp {
       priceLabel.textContent = "Max: ₹1,50,000";
       stockCheckbox.checked = false;
       sortSelect.value = "latest";
-      
+
       filterState.categories = [];
       filterState.maxPrice = 150000;
       filterState.stockOnly = false;
@@ -1607,24 +1616,24 @@ class ECommerceApp {
             <!-- thumbnails -->
             <div class="qv-thumbnail-gallery" style="width:100% !important; margin-bottom:20px !important;">
               ${images.map((img, i) => {
-                const src = (img && !img.startsWith("default_") && !img.startsWith("placeholder"))
-                  ? ((img.startsWith("http") || img.startsWith("data:")) ? img : `/assets/products/${img}`)
-                  : null;
-                
-                if (!src) {
-                  return `
+      const src = (img && !img.startsWith("default_") && !img.startsWith("placeholder"))
+        ? ((img.startsWith("http") || img.startsWith("data:")) ? img : `/assets/products/${img}`)
+        : null;
+
+      if (!src) {
+        return `
                     <div class="qv-thumb ${i === 0 ? "active" : ""}" data-index="${i}">
                       <div class="fallback-svg-container">${window.GalaxyUtils.getPremiumFurnitureSVG(product.category, product.name)}</div>
                     </div>
                   `;
-                }
-                
-                return `
+      }
+
+      return `
                   <div class="qv-thumb ${i === 0 ? "active" : ""}" data-index="${i}" data-src="${src}">
                     <img src="${src}" alt="${product.name}" loading="lazy" onerror="this.outerHTML='<div class=\\'fallback-svg-container\\'>'+window.GalaxyUtils.getPremiumFurnitureSVG('${product.category.replace(/'/g, "\\'")}', '${product.name.replace(/'/g, "\\'")}')+'</div>'">
                   </div>
                 `;
-              }).join("")}
+    }).join("")}
             </div>
           </div>
 
@@ -1636,7 +1645,7 @@ class ECommerceApp {
             <div class="detail-price-row" style="margin-bottom: var(--spacing-sm); border-bottom: none;">
               <span class="detail-price-actual">${window.GalaxyUtils.formatCurrency(product.offerPrice || product.price)}</span>
               ${product.offerPrice ? `<span class="detail-price-original">${window.GalaxyUtils.formatCurrency(product.price)}</span>` : ""}
-              ${product.offerPrice ? `<span class="detail-discount-badge">-${Math.round((product.price - product.offerPrice)/product.price * 100)}% DISCOUNT</span>` : ""}
+              ${product.offerPrice ? `<span class="detail-discount-badge">-${Math.round((product.price - product.offerPrice) / product.price * 100)}% DISCOUNT</span>` : ""}
             </div>
 
             <div class="detail-stock-status" style="margin-bottom: var(--spacing-md); font-weight:600; font-size:1rem; color: ${product.inStock ? 'var(--color-success)' : 'var(--color-error)'}; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: var(--spacing-sm);">
@@ -1670,11 +1679,11 @@ class ECommerceApp {
               <table class="specs-table">
                 <tbody>
                   ${Object.entries(product.specs || {
-                    "Dimensions": "Standard Showroom Fit",
-                    "Upholstery": "Premium Fabric Sourcing",
-                    "Warranty": "1 Year Manufacturer Defect Sourcing Warranty",
-                    "Shipping": "Safe local Erode shipping and expert assembly included"
-                  }).map(([lbl, val]) => `
+      "Dimensions": "Standard Showroom Fit",
+      "Upholstery": "Premium Fabric Sourcing",
+      "Warranty": "1 Year Manufacturer Defect Sourcing Warranty",
+      "Shipping": "Safe local Erode shipping and expert assembly included"
+    }).map(([lbl, val]) => `
                     <tr>
                       <td class="specs-label">${lbl}</td>
                       <td class="specs-value">${val}</td>
@@ -1717,7 +1726,7 @@ class ECommerceApp {
       thumb.addEventListener("click", () => {
         thumbs.forEach(t => t.classList.remove("active"));
         thumb.classList.add("active");
-        
+
         // Grab inner graphic or image source
         const innerImg = thumb.querySelector("img");
         if (innerImg) {
@@ -1738,7 +1747,7 @@ class ECommerceApp {
     // Local Quantity manipulation
     let localQty = 1;
     const qtyVal = document.getElementById("detail-qty-value");
-    
+
     document.getElementById("btn-qty-minus").addEventListener("click", () => {
       if (localQty > 1) {
         localQty--;
@@ -1768,7 +1777,7 @@ class ECommerceApp {
       this.toggleWishlist(product.id);
       let active = this.wishlist.includes(product.id);
       detailWishBtn.classList.toggle("wishlisted", active);
-      
+
       let icon = detailWishBtn.querySelector("i");
       if (active) {
         icon.style.fill = "#C9A227";
@@ -1953,7 +1962,7 @@ class ECommerceApp {
     }
     if (grandEl) {
       let totalShipping = this.cart.reduce((sum, item) => sum + ((item.product.shipping || 0) * item.quantity), 0);
-      let total = subtotal - (subtotal * (discountPercent/100)) + totalShipping;
+      let total = subtotal - (subtotal * (discountPercent / 100)) + totalShipping;
       grandEl.innerHTML = `${window.GalaxyUtils.formatCurrency(total)}`;
     }
   }
@@ -1974,18 +1983,18 @@ class ECommerceApp {
     let discountAmt = 0;
     let discountPercent = 0;
     let appliedPromoStr = "";
-    
+
     // We will inject a dynamic render function for the summary section
     let renderSummary = () => {
       let total = subtotal - discountAmt + totalShipping;
-      
-      
+
+
       document.getElementById("checkout-subtotal-val").textContent = window.GalaxyUtils.formatCurrency(subtotal);
-      
+
       let shipEl = document.getElementById("checkout-shipping-val");
       shipEl.textContent = totalShipping > 0 ? window.GalaxyUtils.formatCurrency(totalShipping) : "FREE";
       shipEl.style.color = totalShipping > 0 ? "inherit" : "var(--color-success)";
-      
+
       let discEl = document.getElementById("checkout-discount-row");
       if (discountAmt > 0) {
         discEl.style.display = "table-row";
@@ -2147,7 +2156,7 @@ class ECommerceApp {
       window.setupPhoneField(document.getElementById("ch-phone"));
       chForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        
+
         const phoneVal = document.getElementById("ch-phone").value.trim();
         const digitsOnly = phoneVal.replace(/[^0-9]/g, "");
         if (phoneVal.startsWith("+")) {
@@ -2321,7 +2330,7 @@ class ECommerceApp {
       let orders = JSON.parse(localStorage.getItem("gd_orders")) || [];
       orders.push(orderDetails);
       localStorage.setItem("gd_orders", JSON.stringify(orders));
-      
+
       // Sync to real backend
       if (window.GalaxyAPI) {
         window.GalaxyAPI.syncEntity('orders', 'POST', orderDetails);
@@ -2329,9 +2338,9 @@ class ECommerceApp {
     } catch (err) {
       console.error("Failed to save order to localStorage:", err);
     }
-    
+
     sessionStorage.setItem("gd_last_order", JSON.stringify(orderDetails));
-    
+
     this.cart = [];
     this.saveCart();
 
@@ -2357,20 +2366,20 @@ class ECommerceApp {
 
     const cleanPhone = orderPhone.replace(/[^0-9]/g, "");
     const formattedPhone = cleanPhone.length === 10 ? "91" + cleanPhone : cleanPhone;
-    
+
     const itemsList = (order.items || []).map(item => `- ${item.name || 'Product'} (x${item.quantity || 1})`).join("%0A");
     const billMessage = `*GALAXY DECOR - ORDER INVOICE*%0A%0A` +
-                        `*Order ID:* ${orderId}%0A` +
-                        `*Date:* ${orderDate}%0A%0A` +
-                        `*Customer Details:*%0A` +
-                        `Name: ${orderName}%0A` +
-                        `Phone: ${orderPhone}%0A` +
-                        `Address: ${orderAddress}%0A%0A` +
-                        `*Items Ordered:*%0A${itemsList}%0A%0A` +
-                        `*Total Amount:* %E2%82%B9${orderTotal.toLocaleString()}%0A` +
-                        `*Payment Method:* ${orderPayment}%0A` +
-                        `*Payment Status:* ${orderPayStatus}%0A%0A` +
-                        `Thank you for shopping with Galaxy Decor!`;
+      `*Order ID:* ${orderId}%0A` +
+      `*Date:* ${orderDate}%0A%0A` +
+      `*Customer Details:*%0A` +
+      `Name: ${orderName}%0A` +
+      `Phone: ${orderPhone}%0A` +
+      `Address: ${orderAddress}%0A%0A` +
+      `*Items Ordered:*%0A${itemsList}%0A%0A` +
+      `*Total Amount:* %E2%82%B9${orderTotal.toLocaleString()}%0A` +
+      `*Payment Method:* ${orderPayment}%0A` +
+      `*Payment Status:* ${orderPayStatus}%0A%0A` +
+      `Thank you for shopping with Galaxy Decor!`;
 
     const whatsappUrl = `https://wa.me/${formattedPhone}?text=${billMessage}`;
 
