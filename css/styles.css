@@ -5116,7 +5116,7 @@ input:focus, select:focus, textarea:focus {
   border-top: 2px solid rgba(212,175,55,0.35) !important;
   border-right: 2px solid rgba(212,175,55,0.35) !important;
   border-bottom: 2px solid rgba(212,175,55,0.35) !important;
-  animation: gd-border-chase 5s ease-in-out infinite !important;
+  animation: none !important;
 }
 
 /* ── 5. SECTION / CONTAINER DIVIDERS — ANIMATED GOLD LINE ─────────────── */
@@ -6496,8 +6496,10 @@ section .btn-black[href="#/contact"] {
   box-shadow: 0 4px 20px rgba(0,0,0,0.04) !important;
   position: sticky !important;
   top: 80px !important;
-  max-height: calc(100vh - 100px) !important;
-  overflow-y: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  overflow-y: visible !important;
+  scrollbar-width: none !important;
 }
 
 .filters-header {
@@ -7462,4 +7464,40 @@ body:has(#quickview-modal:not(.hidden)) {
 }
 .specs-table td:last-child {
   padding-right: 18px !important;
+}
+
+/* --- Disable internal scrollbars on left filter sidebar --- */
+.filters-sidebar,
+#catalog-filters-sidebar {
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+  overflow-y: visible !important;
+  overflow-x: visible !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.filters-sidebar::-webkit-scrollbar,
+#catalog-filters-sidebar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.filter-options {
+  max-height: none !important;
+  overflow: visible !important;
+  overflow-y: visible !important;
+}
+
+/* --- Completely Disable Hover Animations & Transitions on Left Sidepanel --- */
+.filters-sidebar,
+#catalog-filters-sidebar,
+.filters-sidebar:hover,
+#catalog-filters-sidebar:hover {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
 }
