@@ -247,7 +247,7 @@ app.get('/api/solutions', async (req, res) => {
 // ----------------------------------------------------
 app.get('/api/reviews', async (req, res) => {
   try {
-    const { data, error } = await supabase.from('reviews').select('*').order('createdAt', { ascending: false });
+    const { data, error } = await supabase.from('reviews').select('*');
     if (error) throw error;
     res.json(data || []);
   } catch (err) {
