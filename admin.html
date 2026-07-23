@@ -3036,7 +3036,7 @@
     }
 
     // Store Config Submit
-    document.getElementById("settings-store-form").addEventListener("submit", (e) => {
+    document.getElementById("settings-store-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       store.phone = document.getElementById("set-phone").value.trim();
       store.email = document.getElementById("set-email").value.trim();
@@ -3045,6 +3045,12 @@
       store.razorpayKey = document.getElementById("set-razorpay-key").value.trim();
 
       saveStoreConfig();
+
+      // Sync store profile configuration to Supabase Cloud Database
+      if (window.GalaxyAPI) {
+        await window.GalaxyAPI.syncEntity('store', 'POST', store);
+      }
+
       window.GalaxyUtils.showToast("Store profile saved successfully.");
     });
 

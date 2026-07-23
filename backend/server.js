@@ -90,6 +90,23 @@ app.get('/api/store', async (req, res) => {
   }
 });
 
+app.post('/api/store', requireAdminAuth, async (req, res) => {
+  try {
+    const storeObj = req.body || {};
+    const rowsToUpsert = Object.entries(storeObj).map(([key, value]) => ({
+      key,
+      value: String(value)
+    }));
+    if (rowsToUpsert.length > 0) {
+      const { error } = await supabase.from('store_config').upsert(rowsToUpsert);
+      if (error) throw error;
+    }
+    res.json({ message: 'Store profile updated', data: storeObj });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ----------------------------------------------------
 // 2. Categories API
 // ----------------------------------------------------

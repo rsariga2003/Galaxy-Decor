@@ -37,6 +37,10 @@ window.GalaxyAPI = {
       if (store && typeof store === 'object' && !store.error) localStorage.setItem("gd_store", JSON.stringify(store));
       if (Array.isArray(solutions)) localStorage.setItem("gd_solutions", JSON.stringify(solutions));
 
+      if (window.GalaxyAppInstance && typeof window.GalaxyAppInstance.updateStoreConfig === 'function') {
+        window.GalaxyAppInstance.updateStoreConfig();
+      }
+
       console.log("Backend sync successful!");
       return true;
     } catch (error) {

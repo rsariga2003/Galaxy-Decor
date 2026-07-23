@@ -83,6 +83,7 @@ window.setupPhoneField = function(inputEl) {
 
 class ECommerceApp {
   constructor() {
+    window.GalaxyAppInstance = this;
     // 1. Initialize State from LocalStorage or fallbacks
     this.cart = JSON.parse(localStorage.getItem("gd_cart")) || [];
     this.wishlist = JSON.parse(localStorage.getItem("gd_wishlist")) || [];
@@ -148,7 +149,46 @@ class ECommerceApp {
   }
 
   updateStoreConfig() {
-    this.store = JSON.parse(localStorage.getItem("gd_store")) || {};
+    let storedConfig = null;
+    try { storedConfig = JSON.parse(localStorage.getItem("gd_store")); } catch (e) {}
+    this.store = (storedConfig && typeof storedConfig === 'object' && !storedConfig.error)
+      ? storedConfig
+      : (window.GALAXY_DECOR_DB ? window.GALAXY_DECOR_DB.store : {});
+
+    if (!this.store) return;
+
+    const phone = this.store.phone || "8608738393";
+    const email = this.store.email || "galaxydecorind@gmail.com";
+    const address = this.store.address || "4/642, Post Office Building, Sakthi Nagar, Opp. Viswanathan Hospital, Vijayamangalam, Perundurai, Erode - 638056, Tamil Nadu";
+    const hours = this.store.hours || "Mon - Sun: 9:30 AM - 8:30 PM";
+
+    // 1. Top Announcement Bar
+    const topPhone = document.getElementById("topbar-phone");
+    const topPhoneLink = document.getElementById("topbar-phone-link");
+    const topLoc = document.getElementById("topbar-location");
+
+    if (topPhone) topPhone.textContent = phone;
+    if (topPhoneLink) topPhoneLink.href = `tel:${phone.replace(/[^0-9+]/g, '')}`;
+    if (topLoc) {
+      const parts = address.split(",");
+      const shortLoc = parts.length >= 3 ? `${parts[1].trim()}, ${parts[2].trim()}` : address;
+      topLoc.textContent = shortLoc;
+    }
+
+    // 2. Footer Section
+    const footAddress = document.getElementById("footer-address");
+    const footPhone = document.getElementById("footer-phone");
+    const footPhoneLink = document.getElementById("footer-phone-link");
+    const footEmail = document.getElementById("footer-email");
+    const footEmailLink = document.getElementById("footer-email-link");
+    const footHours = document.getElementById("footer-hours");
+
+    if (footAddress) footAddress.textContent = address;
+    if (footPhone) footPhone.textContent = phone;
+    if (footPhoneLink) footPhoneLink.href = `tel:${phone.replace(/[^0-9+]/g, '')}`;
+    if (footEmail) footEmail.textContent = email;
+    if (footEmailLink) footEmailLink.href = `mailto:${email}`;
+    if (footHours) footHours.textContent = hours;
   }
 
   // --- State Updates & Badges ---
