@@ -17,7 +17,7 @@
       --color-primary-soft: #fcfcfc;
       --color-primary-dark: #f0f0f0;
       
-      --color-secondary: #000000;
+      --color-secondary: #222222;
       --color-secondary-soft: #111111;
       --color-secondary-light: #222222;
       --color-secondary-muted: #666666;
@@ -34,7 +34,8 @@
       --font-serif: 'Cormorant Garamond', serif;
       --font-sans: 'Inter', sans-serif;
       
-      --border-radius: 4px;
+      --border-radius: 14px;
+      --border-radius-sm: 8px;
       --transition-fast: 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       --transition-smooth: 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     }
@@ -81,7 +82,7 @@
       background-color: var(--color-primary);
       color: var(--color-secondary-soft);
       font-size: 0.9rem;
-      border-radius: var(--border-radius);
+      border-radius: var(--border-radius-sm);
       transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
     }
 
@@ -101,7 +102,7 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
-      border-radius: var(--border-radius);
+      border-radius: var(--border-radius-sm);
       border: 1px solid transparent;
       cursor: pointer;
       transition: all var(--transition-fast);

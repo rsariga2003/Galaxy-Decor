@@ -7501,3 +7501,38 @@ body:has(#quickview-modal:not(.hidden)) {
   transform: none !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
 }
+
+/* --- Footer Styling Utilities & Portal Alignment --- */
+.footer-logo-badge {
+  width: 58px;
+  height: 58px;
+  margin-bottom: var(--spacing-md);
+}
+
+.social-whatsapp-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.policy-divider {
+  color: var(--color-border);
+  margin: 0 4px;
+}
+
+.footer-admin-link {
+  color: var(--color-accent);
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+.footer-admin-link:hover {
+  color: var(--color-accent-hover);
+}
+
+.footer-admin-icon {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 2px;
+}
