@@ -1609,17 +1609,6 @@ class ECommerceApp {
           <div>
             <span class="detail-meta-cat">${this.getCategoryName(product.category)}</span>
             <h1 class="detail-title">${product.name}</h1>
-            
-            <div class="detail-rating-row">
-              <div class="detail-rating">
-                <i data-lucide="star"></i>
-                <i data-lucide="star"></i>
-                <i data-lucide="star"></i>
-                <i data-lucide="star"></i>
-                <i data-lucide="star" style="fill:none;"></i>
-              </div>
-              <span class="detail-rating-count">12 Showroom Enquiries</span>
-            </div>
 
             <div class="detail-price-row" style="margin-bottom: var(--spacing-sm); border-bottom: none;">
               <span class="detail-price-actual">${window.GalaxyUtils.formatCurrency(product.offerPrice || product.price)}</span>
